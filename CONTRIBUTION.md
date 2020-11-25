@@ -51,7 +51,7 @@ A bug is either a _demonstrable problem_ that is caused by the code in the repos
 Guidelines for bug reports:
 
 1. Use the GitHub issue search — check if the issue has already been reported.
-2. Check if the issue has been fixed — try to reproduce it using the master branch in the repository.
+2. Check if the issue has been fixed — try to reproduce it using the `main` branch in the repository.
 3. and report the problem — ideally create a reduced test case.
 
 Please try to be as detailed as possible in your report. Include information about your Operating System, as well as your dotnet (or mono \ .Net Framework), F# and project versions. Please provide steps to reproduce the issue as well as the outcome you were expecting! All these details will help developers to fix any potential bugs.
@@ -95,14 +95,14 @@ Please adhere to the coding conventions in the project (indentation, accurate co
 2. If you cloned a while ago, get the latest changes from upstream, and update your fork:
 
    ```bash
-   git checkout master
-   git pull upstream master
+   git checkout main
+   git pull upstream main
    git push
    ```
 
-3. Create a new topic branch (off of `master`) to contain your feature, change, or fix.
+3. Create a new topic branch (off of `main`) to contain your feature, change, or fix.
 
-   **IMPORTANT**: Making changes in `master` is discouraged. You should always keep your local `master` in sync with upstream `master` and make your changes in topic branches.
+   **IMPORTANT**: Making changes in `main` is discouraged. You should always keep your local `main` in sync with upstream `main` and make your changes in topic branches.
 
    ```bash
    git checkout -b <topic-branch-name>
@@ -125,13 +125,13 @@ Please adhere to the coding conventions in the project (indentation, accurate co
 
 7. [Open a Pull Request](https://help.github.com/articles/about-pull-requests/) with a clear title and description.
 
-8. If you haven't updated your pull request for a while, you should consider rebasing on master and resolving any conflicts.
+8. If you haven't updated your pull request for a while, you should consider rebasing on `main` and resolving any conflicts.
 
-   **IMPORTANT**: _Never ever_ merge upstream `master` into your branches. You should always `git rebase` on `master` to bring your changes up to date when necessary.
+   **IMPORTANT**: _Never ever_ merge upstream `main` into your branches. You should always `git rebase` on `main` to bring your changes up to date when necessary.
 
    ```bash
-   git checkout master
-   git pull upstream master
+   git checkout main
+   git pull upstream main
    git checkout <your-topic-branch>
-   git rebase master
+   git rebase main
    ```
