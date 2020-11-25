@@ -1,0 +1,197 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETStandard,Version=v2.1": {
+      "FSharp.Control.AsyncSeq/3.0.2": {
+        "type": "package",
+        "dependencies": {
+          "FSharp.Core": "4.3.2"
+        },
+        "compile": {
+          "lib/netstandard2.1/FSharp.Control.AsyncSeq.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/FSharp.Control.AsyncSeq.dll": {}
+        }
+      },
+      "FSharp.Core/5.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/FSharp.Core.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/FSharp.Core.dll": {}
+        },
+        "resource": {
+          "lib/netstandard2.0/cs/FSharp.Core.resources.dll": {
+            "locale": "cs"
+          },
+          "lib/netstandard2.0/de/FSharp.Core.resources.dll": {
+            "locale": "de"
+          },
+          "lib/netstandard2.0/es/FSharp.Core.resources.dll": {
+            "locale": "es"
+          },
+          "lib/netstandard2.0/fr/FSharp.Core.resources.dll": {
+            "locale": "fr"
+          },
+          "lib/netstandard2.0/it/FSharp.Core.resources.dll": {
+            "locale": "it"
+          },
+          "lib/netstandard2.0/ja/FSharp.Core.resources.dll": {
+            "locale": "ja"
+          },
+          "lib/netstandard2.0/ko/FSharp.Core.resources.dll": {
+            "locale": "ko"
+          },
+          "lib/netstandard2.0/pl/FSharp.Core.resources.dll": {
+            "locale": "pl"
+          },
+          "lib/netstandard2.0/pt-BR/FSharp.Core.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "lib/netstandard2.0/ru/FSharp.Core.resources.dll": {
+            "locale": "ru"
+          },
+          "lib/netstandard2.0/tr/FSharp.Core.resources.dll": {
+            "locale": "tr"
+          },
+          "lib/netstandard2.0/zh-Hans/FSharp.Core.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FSharp.Control.AsyncSeq/3.0.2": {
+      "sha512": "4i2ONxFM2i91X3IFypG5nbFX/UTaAwicOeq1RJ1lgmxH+sBiAz34PGoJ8t6GFf2dPJahU40C50WBaAUUyDPG2Q==",
+      "type": "package",
+      "path": "fsharp.control.asyncseq/3.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "fable/AssemblyInfo.fs",
+        "fable/AsyncSeq.fs",
+        "fable/AsyncSeq.fsi",
+        "fable/FSharp.Control.AsyncSeq.fsproj",
+        "fable/obj/Debug/net45/FSharp.Control.AsyncSeq.AssemblyInfo.fs",
+        "fable/obj/Debug/netstandard2.0/FSharp.Control.AsyncSeq.AssemblyInfo.fs",
+        "fable/obj/Debug/netstandard2.1/.NETStandard,Version=v2.1.AssemblyAttributes.fs",
+        "fable/obj/Debug/netstandard2.1/FSharp.Control.AsyncSeq.AssemblyInfo.fs",
+        "fable/obj/Release/net45/FSharp.Control.AsyncSeq.AssemblyInfo.fs",
+        "fable/obj/Release/netstandard2.0/FSharp.Control.AsyncSeq.AssemblyInfo.fs",
+        "fable/obj/Release/netstandard2.1/.NETStandard,Version=v2.1.AssemblyAttributes.fs",
+        "fable/obj/Release/netstandard2.1/FSharp.Control.AsyncSeq.AssemblyInfo.fs",
+        "fsharp.control.asyncseq.3.0.2.nupkg.sha512",
+        "fsharp.control.asyncseq.nuspec",
+        "lib/netstandard2.1/FSharp.Control.AsyncSeq.dll",
+        "lib/netstandard2.1/FSharp.Control.AsyncSeq.xml"
+      ]
+    },
+    "FSharp.Core/5.0.0": {
+      "sha512": "iHoYXA0VaSQUONGENB1aVafjDDZDZpwu39MtaRCTrmwFW/cTcK0b2yKNVYneFHJMc3ChtsSoM9lNtJ1dYXkHfA==",
+      "type": "package",
+      "path": "fsharp.core/5.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "fsharp.core.5.0.0.nupkg.sha512",
+        "fsharp.core.nuspec",
+        "lib/netstandard2.0/FSharp.Core.dll",
+        "lib/netstandard2.0/FSharp.Core.xml",
+        "lib/netstandard2.0/cs/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/de/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/es/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/fr/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/it/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ja/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ko/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/pl/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/pt-BR/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ru/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/tr/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/zh-Hans/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETStandard,Version=v2.1": [
+      "FSharp.Control.AsyncSeq >= 3.0.2",
+      "FSharp.Core >= 5.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Michelle\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\Michelle\\Desktop\\Personal\\Repos\\Vp.FSharp.Sql\\Vp.FSharp.Sql\\Vp.FSharp.Sql.fsproj",
+      "projectName": "Vp.FSharp.Sql",
+      "projectPath": "C:\\Users\\Michelle\\Desktop\\Personal\\Repos\\Vp.FSharp.Sql\\Vp.FSharp.Sql\\Vp.FSharp.Sql.fsproj",
+      "packagesPath": "C:\\Users\\Michelle\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Michelle\\Desktop\\Personal\\Repos\\Vp.FSharp.Sql\\Vp.FSharp.Sql\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\Michelle\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "netstandard2.1"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "projectReferences": {}
+        }
+      }
+    },
+    "frameworks": {
+      "netstandard2.1": {
+        "targetAlias": "netstandard2.1",
+        "dependencies": {
+          "FSharp.Control.AsyncSeq": {
+            "target": "Package",
+            "version": "[3.0.2, )",
+            "generatePathProperty": true
+          },
+          "FSharp.Core": {
+            "target": "Package",
+            "version": "[5.0.0, )",
+            "generatePathProperty": true
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "NETStandard.Library": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
