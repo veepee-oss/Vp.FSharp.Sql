@@ -1,0 +1,38 @@
+name: On Push
+
+on: [push]
+
+jobs:
+
+  lint-commit:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Lint Commit Messages
+        uses: wagoid/commitlint-github-action@v1
+        with:
+          configFile: './.commitlintrc.yml'
+          firstParent: false
+          failOnWarnings: true
+
+  lint-code:
+    needs: lint-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Setup .NET Environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.0
+      - name: Restore .NET Tools
+        run: dotnet tool restore --tool-manifest ./.config/dotnet-tools.json
+      - name: Restore .NET Projects
+        run: dotnet restore
+      - name: Run F# Linter
+        run: dotnet fsharplint lint --lint-config fsharplint.json Vp.FSharp.Sql.SqlServer.sln

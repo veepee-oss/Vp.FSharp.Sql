@@ -8,6 +8,19 @@ ProjectSection(SolutionItems) = preProject
 	CONTRIBUTION.md = CONTRIBUTION.md
 	README.md = README.md
 	.gitignore = .gitignore
+	.commitlintrc.yml = .commitlintrc.yml
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{FD0927B2-AFAA-4046-B757-81730D7CD8B3}"
+ProjectSection(SolutionItems) = preProject
+	.config\dotnet-tools.json = .config\dotnet-tools.json
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{D24BD095-2455-4484-8BEC-E8E640B5074E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{58EDEDAB-F1B9-4435-8077-3A0177A69651}"
+ProjectSection(SolutionItems) = preProject
+	.github\workflows\on-push.yml = .github\workflows\on-push.yml
 EndProjectSection
 EndProject
 Global
@@ -20,5 +33,10 @@ Global
 		{7C42F441-8842-4337-966C-2DA2892EC121}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C42F441-8842-4337-966C-2DA2892EC121}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C42F441-8842-4337-966C-2DA2892EC121}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FD0927B2-AFAA-4046-B757-81730D7CD8B3} = {4D44F607-E623-4185-A667-21AA1DD676AA}
+		{D24BD095-2455-4484-8BEC-E8E640B5074E} = {4D44F607-E623-4185-A667-21AA1DD676AA}
+		{58EDEDAB-F1B9-4435-8077-3A0177A69651} = {D24BD095-2455-4484-8BEC-E8E640B5074E}
 	EndGlobalSection
 EndGlobal
