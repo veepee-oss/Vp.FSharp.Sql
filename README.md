@@ -1,6 +1,6 @@
 # Vp.FSharp.Sql
 
-This is the official repository of the Veepee F# open-sourced libraries.
+The core library that enables to work with any ADO provider _consistently_.
 
 ## Slagging Hype
 
