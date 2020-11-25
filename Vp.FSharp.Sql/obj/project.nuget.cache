@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "TZLMsVHV9VmNFd08QsHZCE2pDzCIgbugz04pAlk9vbEFrgA6rGMC+r6XLXT+uIWykPZzxvZjt0mjeEatrRFt9Q==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Michelle\\Desktop\\Personal\\Repos\\Vp.FSharp.Sql\\Vp.FSharp.Sql\\Vp.FSharp.Sql.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Michelle\\.nuget\\packages\\fsharp.control.asyncseq\\3.0.2\\fsharp.control.asyncseq.3.0.2.nupkg.sha512",
+    "C:\\Users\\Michelle\\.nuget\\packages\\fsharp.core\\5.0.0\\fsharp.core.5.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
