@@ -7,8 +7,11 @@
     <e p="C:\Users\Michelle\AppData\Roaming\JetBrains\Rider2020.3\extensions" t="IncludeRecursive" />
     <e p="C:\Users\Michelle\AppData\Roaming\JetBrains\Rider2020.3\scratches" t="IncludeRecursive" />
     <e p="C:\Users\Michelle\Desktop\Personal\Repos\Vp.FSharp.Sql" t="IncludeFlat">
+      <e p=".gitignore" t="Include" />
+      <e p="CONTRIBUTION.md" t="Include" />
       <e p="LICENSE" t="Include" />
       <e p="packages" t="ExcludeRecursive" />
+      <e p="README.md" t="Include" />
       <e p="Solution Items" t="Include" />
       <e p="Vp.FSharp.Sql" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
