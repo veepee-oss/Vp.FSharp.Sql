@@ -1,0 +1,97 @@
+{
+  "ignoreFiles": [
+    "*assemblyinfo.*"
+  ],
+  "formatting": {
+    "typedItemSpacing": {
+      "enabled": true,
+      "config": {
+        "typedItemStyle": "SpaceAfter"
+      }
+    },
+    "typePrefixing": { "enabled": false },
+    "unionDefinitionIndentation": { "enabled": false },
+    "moduleDeclSpacing": { "enabled": false },
+    "classMemberSpacing": { "enabled": false },
+    "tupleFormatting": {
+      "tupleCommaSpacing": { "enabled": false },
+      "tupleIndentation": { "enabled": true },
+      "tupleParentheses": { "enabled": true }
+    },
+    "patternMatchFormatting": {
+      "patternMatchClausesOnNewLine": { "enabled": true },
+      "patternMatchOrClausesOnNewLine": { "enabled": true },
+      "patternMatchClauseIndentation": { "enabled": true },
+      "patternMatchExpressionIndentation": { "enabled": true }
+    }
+  },
+  "conventions": {
+    "recursiveAsyncFunction": { "enabled": true },
+    "redundantNewKeyword": { "enabled": true },
+    "nestedStatements": {
+      "enabled": true,
+      "config": {
+        "depth": 16
+      }
+    },
+    "reimplementsFunction": { "enabled": true },
+    "canBeReplacedWithComposition": { "enabled": true },
+    "raiseWithTooManyArgs": {
+      "raiseWithSingleArgument": { "enabled": true },
+      "nullArgWithSingleArgument": { "enabled": true },
+      "invalidOpWithSingleArgument": { "enabled": true },
+      "invalidArgWithTwoArguments": { "enabled": true },
+      "failwithfWithArgumentsMatchingFormatString": { "enabled": true }
+    },
+    "numberOfItems": {
+      "maxNumberOfFunctionParameters": {
+        "enabled": true,
+        "config": {
+          "maxItems": 8
+        }
+      },
+      "maxNumberOfBooleanOperatorsInCondition": {
+        "enabled": true,
+        "config": {
+          "maxItems": 4
+        }
+      }
+    },
+    "binding": {
+      "favourIgnoreOverLetWild": { "enabled": true },
+      "wildcardNamedWithAsPattern": { "enabled": true },
+      "uselessBinding": { "enabled": true },
+      "tupleOfWildcards": { "enabled": true }
+    }
+  },
+  "typography": {
+    "indentation": {
+      "enabled": false,
+      "config": {
+        "numberOfIndentationSpaces": 4
+      }
+    },
+    "maxCharactersOnLine": {
+      "enabled": true,
+      "config": {
+        "maxCharactersOnLine": 160
+      }
+    },
+    "trailingWhitespaceOnLine": {
+      "enabled": true,
+      "config": {
+        "numberOfSpacesAllowed": 0,
+        "oneSpaceAllowedAfterOperator": false,
+        "ignoreBlankLines": false
+      }
+    },
+    "maxLinesInFile": {
+      "enabled": true,
+      "config": {
+        "maxLinesInFile": 1000
+      }
+    },
+    "trailingNewLineInFile": { "enabled": false },
+    "noTabCharacters": { "enabled": true }
+  }
+}

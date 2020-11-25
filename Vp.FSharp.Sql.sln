@@ -9,6 +9,7 @@ ProjectSection(SolutionItems) = preProject
 	README.md = README.md
 	.gitignore = .gitignore
 	.commitlintrc.yml = .commitlintrc.yml
+	fsharplint.json = fsharplint.json
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{FD0927B2-AFAA-4046-B757-81730D7CD8B3}"
