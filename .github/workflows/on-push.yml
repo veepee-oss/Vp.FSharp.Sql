@@ -35,4 +35,4 @@ jobs:
       - name: Restore .NET Projects
         run: dotnet restore
       - name: Run F# Linter
-        run: dotnet fsharplint lint --lint-config fsharplint.json Vp.FSharp.Sql.SqlServer.sln
+        run: dotnet fsharplint lint --lint-config fsharplint.json Vp.FSharp.Sql.sln
