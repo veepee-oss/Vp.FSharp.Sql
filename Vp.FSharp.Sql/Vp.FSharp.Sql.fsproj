@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Title>Vp.FSharp.Sql</Title>
+    <Product>Vp.FSharp</Product>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Authors>Kerry Perret</Authors>
+    <Company>Veepee</Company>
+    <RepositoryUrl>https://github.com/veepee-oss/Vp.FSharp.Sql</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/veepee-oss/Vp.FSharp.Sql</PackageProjectUrl>
+    <PackageDescription>Generic F# ADO Provider Wrapper</PackageDescription>
+    <PackageId>Vp.FSharp.Sql</PackageId>
+    <PackageTags>Veepee,F#,fsharp,functional,SQL</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Helpers.fs" />
+    <Compile Include="TransactionScope.fs" />
+    <Compile Include="Transaction.fs" />
+    <Compile Include="Sql.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Control.AsyncSeq" Version="3.0.2" />
+  </ItemGroup>
+
+</Project>
