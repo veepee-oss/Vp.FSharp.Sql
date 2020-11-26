@@ -1,4 +1,4 @@
-name: On Tag Main
+name: On Release Tag Main
 
 on:
   release:
