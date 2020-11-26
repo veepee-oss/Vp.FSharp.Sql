@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
+    <UpdateAssemblyInfo>false</UpdateAssemblyInfo>
     <TargetFramework>net5.0</TargetFramework>
     <Title>Vp.FSharp.Sql</Title>
     <Product>Vp.FSharp</Product>
