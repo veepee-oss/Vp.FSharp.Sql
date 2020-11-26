@@ -20,7 +20,7 @@ jobs:
           firstParent: false
           failOnWarnings: true
 
-  lint-code:
+  lint-test-code:
     needs: lint-commit
     runs-on: ubuntu-latest
     steps:
@@ -36,3 +36,5 @@ jobs:
         run: dotnet restore
       - name: Run F# Linter
         run: dotnet fsharplint lint --lint-config fsharplint.json Vp.FSharp.Sql.sln
+      - name: Run Tests
+        run: dotnet test
