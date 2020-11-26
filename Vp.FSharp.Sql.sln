@@ -22,7 +22,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{58EDEDAB-F1B9-4435-8077-3A0177A69651}"
 ProjectSection(SolutionItems) = preProject
 	.github\workflows\on-push.yml = .github\workflows\on-push.yml
-	.github\workflows\on-tag-main.yml = .github\workflows\on-tag-main.yml
+	.github\workflows\on-release-tag-main.yml = .github\workflows\on-release-tag-main.yml
 EndProjectSection
 EndProject
 Global
