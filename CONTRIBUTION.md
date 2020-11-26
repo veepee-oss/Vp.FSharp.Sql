@@ -85,11 +85,11 @@ Please adhere to the coding conventions in the project (indentation, accurate co
 
    ```bash
    # Clone your fork of the repo into the current directory
-   git clone https://github.com/<your-username>/MessingUp
+   git clone https://github.com/<your-username>/Vp.FSharp.Sql
    # Navigate to the newly cloned directory
-   cd MessingUp
+   cd Vp.FSharp.Sql
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/fsprojects/MessingUp
+   git remote add upstream https://github.com/fsprojects/Vp.FSharp.Sql
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream, and update your fork:
