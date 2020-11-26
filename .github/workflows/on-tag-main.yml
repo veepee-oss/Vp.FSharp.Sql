@@ -31,9 +31,9 @@ jobs:
       - name: Get NuGet Package Path
         run: |
           basePath=./nuget
-          fileName=$(ls ./nuget/ | head -n 1)
+          fileName=$(ls $basePath/ | head -n 1)
           filePath=$basePath/$fileName
-          echo "nuget_package_path=nuget_package_path::${filePath}" >> $GITHUB_ENV
+          echo "nuget_package_path=${basePath}/${fileName}" >> $GITHUB_ENV
       - name: Update NuGet Package to Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
