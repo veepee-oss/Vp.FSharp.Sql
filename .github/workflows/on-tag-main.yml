@@ -23,14 +23,7 @@ jobs:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get Tag Version
         id: getversion
-        run: |
-          # disable command workflow processing
-          echo "::stop-commands::`echo -n ${{secrets.GITHUB_TOKEN}} | sha256sum | head -c 64`"
-
-          echo "::set-env name=tag_version::${GITHUB_REF#refs/tags/v}"
-
-          # enable workflow command processing
-          echo "::`echo -n ${{secrets.GITHUB_TOKEN}} | sha256sum | head -c 64`::"
+        run: echo "tag_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       - name: Build .NET Project
         run: dotnet build --configuration Release -p:Version=${{env.tag_version}} ./Vp.FSharp.Sql/Vp.FSharp.Sql.fsproj
       - name: Generate NuGet Package from .NET Project
@@ -40,14 +33,7 @@ jobs:
           basePath=./nuget
           fileName=$(ls ./nuget/ | head -n 1)
           filePath=$basePath/$fileName
-
-          # disable command workflow processing
-          echo "::stop-commands::`echo -n ${{secrets.GITHUB_TOKEN}} | sha256sum | head -c 64`"
-
-          echo "::set-env name=nuget_package_path::${filePath}"
-
-          # enable workflow command processing
-          echo "::`echo -n ${{secrets.GITHUB_TOKEN}} | sha256sum | head -c 64`::"
+          echo "nuget_package_path=nuget_package_path::${filePath}" >> $GITHUB_ENV
       - name: Update NuGet Package to Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
