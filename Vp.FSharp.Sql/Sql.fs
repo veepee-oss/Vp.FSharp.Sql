@@ -5,25 +5,36 @@ open System.Data
 open System.Threading
 open System.Data.Common
 
+open System.Threading.Tasks
 open FSharp.Control
 
 open Vp.FSharp.Sql.Helpers
+
 
 
 type Text =
     | Single of string
     | Multiple of string list
 
-type CommandDefinition<'DbConnection, 'DbParameter, 'DbType
+type LoggerKind<'DbCommand when 'DbCommand :> DbCommand> =
+    | Global
+    | Override of ('DbCommand -> unit)
+    | Nothing
+
+type CommandDefinition<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
     when 'DbConnection :> DbConnection
-    and 'DbParameter :> DbParameter> =
+    and 'DbTransaction :> DbTransaction
+    and 'DbCommand :> DbCommand
+    and 'DbParameter :> DbParameter
+    and 'DbDataReader :> DbDataReader> =
     { Text: Text
       Parameters: (string * 'DbType) list
       CancellationToken: CancellationToken
       Timeout: TimeSpan
       CommandType: CommandType
       Prepare: bool
-      Transaction: DbTransaction option }
+      Transaction: 'DbTransaction option
+      Logger: LoggerKind<'DbCommand> }
 
 type DbField =
     { Name: string
@@ -31,16 +42,14 @@ type DbField =
       NetTypeName: string
       NativeTypeName: string }
 
-type SqlRecordReader(dataReader: DbDataReader) =
+type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReader: 'DbDataReader) =
+    let mapFieldIndex fieldIndex =
+        { Index = fieldIndex
+          Name = dataReader.GetName(fieldIndex)
+          NetTypeName = dataReader.GetFieldType(fieldIndex).Name
+          NativeTypeName = dataReader.GetDataTypeName(fieldIndex) }
 
-    let cachedFields =
-        [0 .. dataReader.FieldCount - 1]
-        |> List.map(fun fieldIndex ->
-               { Index = fieldIndex
-                 Name = dataReader.GetName(fieldIndex)
-                 NetTypeName = dataReader.GetFieldType(fieldIndex).Name
-                 NativeTypeName = dataReader.GetDataTypeName(fieldIndex) })
-
+    let cachedFields = [0 .. dataReader.FieldCount - 1] |> List.map mapFieldIndex
     let cachedFieldsByName = cachedFields |> List.map(fun column -> (column.Name, column)) |> readOnlyDict
     let cachedFieldsByIndex = cachedFields |> List.map(fun column -> (column.Index, column)) |> readOnlyDict
 
@@ -98,7 +107,16 @@ type SqlRecordReader(dataReader: DbDataReader) =
 
 exception SqlNoDataAvailableException
 
-
+type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
+    when 'DbConnection :> DbConnection
+    and 'DbTransaction :> DbTransaction
+    and 'DbCommand :> DbCommand
+    and 'DbParameter :> DbParameter
+    and 'DbDataReader :> DbDataReader> = {
+        CreateCommand: 'DbConnection -> 'DbCommand
+        ExecuteReaderAsync: 'DbCommand -> Task<'DbDataReader>
+        DbValueToParameter: string -> 'DbType -> 'DbParameter
+    }
 
 [<RequireQualifiedAccess>]
 module SqlCommand =
@@ -119,7 +137,8 @@ module SqlCommand =
           Timeout = TimeSpan.FromSeconds(DefaultTimeoutInSeconds)
           CommandType = DefaultCommandType
           Prepare = DefaultPrepare
-          Transaction = None }
+          Transaction = None
+          Logger = Nothing }
 
     /// Initialize a command definition with the given text contained in the given string.
     let text value = { defaultCommandDefinition() with Text = Text.Single value }
@@ -149,13 +168,9 @@ module SqlCommand =
         if not (parameterName.StartsWith "@") then sprintf "@%s" parameterName
         else parameterName
 
-    let private setupCommand
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>)
-        cancellationToken =
+    let private setupCommand connection deps commandDefinition cancellationToken =
         async {
-            let command = connection.CreateCommand()
+            let command = deps.CreateCommand connection
 
             Option.map
                 (fun transaction -> command.Transaction <- transaction)
@@ -168,7 +183,7 @@ module SqlCommand =
 
             commandDefinition.Parameters
             |> List.iter(fun (name, value) ->
-                let parameter = dbValueToParameter name value
+                let parameter = deps.DbValueToParameter name value
                 command.Parameters.Add(parameter) |> ignore)
 
             command.CommandTimeout <- int32 commandDefinition.Timeout.TotalMilliseconds
@@ -180,15 +195,12 @@ module SqlCommand =
             return command
         }
 
-    let private setupConnection (connection: DbConnection) cancellationToken =
+    let private setupConnection (connection: #DbConnection) cancellationToken =
         async { do! connection.OpenAsync(cancellationToken) |> Async.AwaitTask }
 
     type private ReadState = { Continue: bool; SetIndex: int32; RecordIndex: int32 }
 
-    let private readNextResultRecord
-        state
-        (dataReader: DbDataReader)
-        cancellationToken =
+    let private readNextResultRecord state (dataReader: #DbDataReader) cancellationToken =
         async {
             let! nextRecordOk = dataReader.ReadAsync(cancellationToken) |> Async.AwaitTask
             if nextRecordOk then
@@ -206,17 +218,11 @@ module SqlCommand =
         }
 
     /// Return the sets of rows as an AsyncSeq accordingly to the command definition.
-    let queryAsyncSeq
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        read
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>
-            when 'DbConnection :> DbConnection
-            and 'DbParameter :> DbParameter) =
+    let queryAsyncSeq (connection: #DbConnection) deps read commandDefinition =
         asyncSeq {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection dbValueToParameter commandDefinition linkedToken
+            use! command = setupCommand connection deps commandDefinition linkedToken
 
             try
                 if wasClosed then do! setupConnection connection linkedToken
@@ -230,7 +236,9 @@ module SqlCommand =
                     |> AsyncSeq.skip(1)
                     |> AsyncSeq.takeWhile(fun state -> state.Continue)
                     |> AsyncSeq.mapChange(fun state -> state.SetIndex) (fun _ -> SqlRecordReader(dbDataReader))
-                    |> AsyncSeq.mapAsync(fun (state, rowReader) -> async { return read state.SetIndex state.RecordIndex rowReader })
+                    |> AsyncSeq.mapAsync(fun (state, rowReader) -> async {
+                        return read state.SetIndex state.RecordIndex rowReader
+                    })
                 yield! items
             finally
                 if wasClosed then connection.Close()
@@ -242,31 +250,18 @@ module SqlCommand =
         |> AsyncSeq.toListAsync
 
     /// Return the first set of rows as a list accordingly to the command definition.
-    let querySetList
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        read
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>
-            when 'DbConnection :> DbConnection
-            and 'DbParameter :> DbParameter) =
+    let querySetList (connection: #DbConnection) deps read commandDefinition =
         async {
             let setList = ResizeArray()
             let readRecord setIndex recordIndex recordReader =
                 if setIndex = 0 then setList.Add(read recordIndex recordReader)
                 else ()
-            do! queryAsyncSeq connection dbValueToParameter readRecord commandDefinition |> AsyncSeq.consume
+            do! queryAsyncSeq connection deps readRecord commandDefinition |> AsyncSeq.consume
             return setList |> Seq.toList
         }
 
     /// Return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
-    let querySetList2
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        read1
-        read2
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>
-            when 'DbConnection :> DbConnection
-            and 'DbParameter :> DbParameter) =
+    let querySetList2 connection deps read1 read2 commandDefinition =
         async {
             let set1List = ResizeArray()
             let set2List = ResizeArray()
@@ -274,20 +269,12 @@ module SqlCommand =
                 if   setIndex = 0 then set1List.Add(read1 recordIndex recordReader)
                 elif setIndex = 1 then set2List.Add(read2 recordIndex recordReader)
                 else ()
-            do! queryAsyncSeq connection dbValueToParameter readRecord commandDefinition |> AsyncSeq.consume
+            do! queryAsyncSeq connection deps readRecord commandDefinition |> AsyncSeq.consume
             return (set1List |> Seq.toList, set2List |> Seq.toList)
         }
 
     /// Return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
-    let querySetList3
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        read1
-        read2
-        read3
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>
-            when 'DbConnection :> DbConnection
-            and 'DbParameter :> DbParameter) =
+    let querySetList3 connection deps read1 read2 read3 commandDefinition =
         async {
             let set1List = ResizeArray()
             let set2List = ResizeArray()
@@ -297,23 +284,18 @@ module SqlCommand =
                 elif setIndex = 1 then set2List.Add(read2 recordIndex recordReader)
                 elif setIndex = 2 then set3List.Add(read3 recordIndex recordReader)
                 else ()
-            do! queryAsyncSeq connection dbValueToParameter readRecord commandDefinition |> AsyncSeq.consume
+            do! queryAsyncSeq connection deps readRecord commandDefinition |> AsyncSeq.consume
             return (set1List |> Seq.toList, set2List |> Seq.toList, set3List |> Seq.toList)
         }
 
     /// Execute the command accordingly to its definition and,
     /// - return the first cell value, if it is available and of the given type.
     /// - throw an exception, otherwise.
-    let executeScalar<'Scalar, .. >
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>
-            when 'DbConnection :> DbConnection
-            and 'DbParameter :> DbParameter) =
+    let executeScalar<'Scalar, .. > (connection: #DbConnection) deps commandDefinition =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection dbValueToParameter commandDefinition linkedToken
+            use! command = setupCommand connection deps commandDefinition linkedToken
 
             try
                 if wasClosed then do! setupConnection connection linkedToken
@@ -335,17 +317,12 @@ module SqlCommand =
     /// - return Some, if the first cell is available and of the given type.
     /// - return None, if first cell is DbNull.
     /// - throw an exception, otherwise.
-    let executeScalarOrNone<'Scalar, .. >
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>
-            when 'DbConnection :> DbConnection
-            and 'DbParameter :> DbParameter) =
+    let executeScalarOrNone<'Scalar, .. > (connection: #DbConnection) deps commandDefinition =
         async {
 
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection dbValueToParameter commandDefinition linkedToken
+            use! command = setupCommand connection deps commandDefinition linkedToken
 
             try
                 if wasClosed then do! setupConnection connection linkedToken
@@ -361,16 +338,11 @@ module SqlCommand =
         }
 
     /// Execute the command accordingly to its definition and, return the number of rows affected.
-    let executeNonQuery
-        (connection: 'DbConnection when 'DbConnection :> DbConnection)
-        (dbValueToParameter: string -> 'DbType -> 'DbParameter when 'DbParameter :> DbParameter)
-        (commandDefinition: CommandDefinition<'DbConnection, 'DbParameter, 'DbType>
-            when 'DbConnection :> DbConnection
-            and 'DbParameter :> DbParameter) =
+    let executeNonQuery (connection: #DbConnection) deps commandDefinition =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection dbValueToParameter commandDefinition linkedToken
+            use! command = setupCommand connection deps commandDefinition linkedToken
 
             try
                 if wasClosed then do! setupConnection connection linkedToken
