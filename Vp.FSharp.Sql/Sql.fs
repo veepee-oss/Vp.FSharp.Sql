@@ -6,10 +6,10 @@ open System.Threading
 open System.Data.Common
 
 open System.Threading.Tasks
+
 open FSharp.Control
 
 open Vp.FSharp.Sql.Helpers
-
 
 
 type Text =
@@ -35,6 +35,26 @@ type CommandDefinition<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 
       Prepare: bool
       Transaction: 'DbTransaction option
       Logger: LoggerKind<'DbCommand> }
+
+type SqlLog<'DbConnection, 'DbCommand
+    when 'DbConnection :> DbConnection
+    and 'DbCommand :> DbCommand> =
+    | ConnectionOpened of connection: 'DbConnection
+    | ConnectionClosed of connection: 'DbConnection * sinceOpened: TimeSpan
+    | CommandPrepared of command: 'DbCommand
+    | CommandExecuted of command: 'DbCommand * sincePrepared: TimeSpan
+
+type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
+    when 'DbConnection :> DbConnection
+    and 'DbTransaction :> DbTransaction
+    and 'DbCommand :> DbCommand
+    and 'DbParameter :> DbParameter
+    and 'DbDataReader :> DbDataReader> = {
+        CreateCommand: 'DbConnection -> 'DbCommand
+        ExecuteReaderAsync: 'DbCommand -> Task<'DbDataReader>
+        DbValueToParameter: string -> 'DbType -> 'DbParameter
+        GlobalLogger: SqlLog<'DbConnection, 'DbCommand> -> unit
+    }
 
 type DbField =
     { Name: string
@@ -107,16 +127,6 @@ type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReade
 
 exception SqlNoDataAvailableException
 
-type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
-    when 'DbConnection :> DbConnection
-    and 'DbTransaction :> DbTransaction
-    and 'DbCommand :> DbCommand
-    and 'DbParameter :> DbParameter
-    and 'DbDataReader :> DbDataReader> = {
-        CreateCommand: 'DbConnection -> 'DbCommand
-        ExecuteReaderAsync: 'DbCommand -> Task<'DbDataReader>
-        DbValueToParameter: string -> 'DbType -> 'DbParameter
-    }
 
 [<RequireQualifiedAccess>]
 module SqlCommand =
@@ -145,6 +155,14 @@ module SqlCommand =
 
     /// Initialize a command definition with the given text spanning over several strings (ie. list).
     let textFromList value = { defaultCommandDefinition() with Text = Text.Multiple value }
+
+    /// Update the command definition so that when executing the command, it doesn't use any logger.
+    /// Be it the default one (Global) or a previously overriden one.
+    let noLogger commandDefinition = { commandDefinition with Logger = LoggerKind.Nothing }
+
+    /// Update the command definition so that when executing the command, it use the given overriding logger.
+    /// instead of the default one, aka the Global logger.
+    let overrideLogger value commandDefinition = { commandDefinition with Logger = LoggerKind.Override value }
 
     /// Update the command definition with the given parameters.
     let parameters value commandDefinition = { commandDefinition with Parameters = value }
