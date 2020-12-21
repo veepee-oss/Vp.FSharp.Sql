@@ -53,7 +53,7 @@ type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataRea
         CreateCommand: 'DbConnection -> 'DbCommand
         ExecuteReaderAsync: 'DbCommand -> Task<'DbDataReader>
         DbValueToParameter: string -> 'DbType -> 'DbParameter
-        GlobalLogger: SqlLog<'DbConnection, 'DbCommand> -> unit
+        GlobalLogger: (SqlLog<'DbConnection, 'DbCommand> -> unit) option
     }
 
 type DbField =
@@ -157,11 +157,11 @@ module SqlCommand =
     let textFromList value = { defaultCommandDefinition() with Text = Text.Multiple value }
 
     /// Update the command definition so that when executing the command, it doesn't use any logger.
-    /// Be it the default one (Global) or a previously overriden one.
+    /// Be it the default one (Global, if any.) or a previously overriden one.
     let noLogger commandDefinition = { commandDefinition with Logger = LoggerKind.Nothing }
 
     /// Update the command definition so that when executing the command, it use the given overriding logger.
-    /// instead of the default one, aka the Global logger.
+    /// instead of the default one, aka the Global logger, if any.
     let overrideLogger value commandDefinition = { commandDefinition with Logger = LoggerKind.Override value }
 
     /// Update the command definition with the given parameters.
@@ -316,7 +316,9 @@ module SqlCommand =
             use! command = setupCommand connection deps commandDefinition linkedToken
 
             try
-                if wasClosed then do! setupConnection connection linkedToken
+                if wasClosed then
+                    do! setupConnection connection linkedToken
+
                 use! dataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let! anyData = dataReader.ReadAsync(linkedToken) |> Async.AwaitTask
                 if not anyData then
