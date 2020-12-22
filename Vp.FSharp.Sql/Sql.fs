@@ -16,9 +16,19 @@ type Text =
     | Single of string
     | Multiple of string list
 
-type LoggerKind<'DbCommand when 'DbCommand :> DbCommand> =
+type SqlLog<'DbConnection, 'DbCommand
+    when 'DbConnection :> DbConnection
+    and 'DbCommand :> DbCommand> =
+    | ConnectionOpened of connection: 'DbConnection
+    | ConnectionClosed of connection: 'DbConnection
+    | CommandPrepared of command: 'DbCommand
+    | CommandExecuted of command: 'DbCommand * sinceOpened: TimeSpan
+
+type LoggerKind<'DbConnection, 'DbCommand
+    when 'DbConnection :> DbConnection
+    and 'DbCommand :> DbCommand> =
     | Global
-    | Override of ('DbCommand -> unit)
+    | Override of (SqlLog<'DbConnection, 'DbCommand> -> unit)
     | Nothing
 
 type CommandDefinition<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
@@ -34,15 +44,7 @@ type CommandDefinition<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 
       CommandType: CommandType
       Prepare: bool
       Transaction: 'DbTransaction option
-      Logger: LoggerKind<'DbCommand> }
-
-type SqlLog<'DbConnection, 'DbCommand
-    when 'DbConnection :> DbConnection
-    and 'DbCommand :> DbCommand> =
-    | ConnectionOpened of connection: 'DbConnection
-    | ConnectionClosed of connection: 'DbConnection * sinceOpened: TimeSpan
-    | CommandPrepared of command: 'DbCommand
-    | CommandExecuted of command: 'DbCommand * sincePrepared: TimeSpan
+      Logger: LoggerKind<'DbConnection, 'DbCommand> }
 
 type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
     when 'DbConnection :> DbConnection
@@ -186,7 +188,7 @@ module SqlCommand =
         if not (parameterName.StartsWith "@") then sprintf "@%s" parameterName
         else parameterName
 
-    let private setupCommand connection deps commandDefinition cancellationToken =
+    let private setupCommand deps commandDefinition cancellationToken connection =
         async {
             let command = deps.CreateCommand connection
 
@@ -214,7 +216,8 @@ module SqlCommand =
         }
 
     let private setupConnection (connection: #DbConnection) cancellationToken =
-        async { do! connection.OpenAsync(cancellationToken) |> Async.AwaitTask }
+        connection.OpenAsync(cancellationToken)
+        |> Async.AwaitTask
 
     type private ReadState = { Continue: bool; SetIndex: int32; RecordIndex: int32 }
 
@@ -235,15 +238,30 @@ module SqlCommand =
                     return { state with Continue = false }
         }
 
+    let private log deps commandDefinition sqlLog =
+        match commandDefinition.Logger with
+        | Global -> deps.GlobalLogger
+        | Override logging -> Some logging
+        | Nothing -> None
+        |> Option.map (fun callback -> sqlLog |> callback)
+        |> ignore
+
     /// Return the sets of rows as an AsyncSeq accordingly to the command definition.
     let queryAsyncSeq (connection: #DbConnection) deps read commandDefinition =
         asyncSeq {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection deps commandDefinition linkedToken
+            let log sqlLog = log deps commandDefinition sqlLog
+            let sw = System.Diagnostics.Stopwatch()
+            use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
-                if wasClosed then do! setupConnection connection linkedToken
+                if wasClosed then
+                    do! setupConnection connection linkedToken
+                    ConnectionOpened connection |> log
+
+                CommandPrepared command |> log
+                sw.Start ()
                 use! dbDataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let items =
                     AsyncSeq.initInfinite(fun _ -> (dbDataReader, linkedToken))
@@ -258,8 +276,13 @@ module SqlCommand =
                         return read state.SetIndex state.RecordIndex rowReader
                     })
                 yield! items
+
             finally
-                if wasClosed then connection.Close()
+                sw.Stop ()
+                CommandExecuted (command, sw.Elapsed) |> log
+                if wasClosed then
+                    connection.Close()
+                    ConnectionClosed connection |> log
         }
 
     /// Return the sets of rows as a list accordingly to the command definition.
@@ -313,12 +336,17 @@ module SqlCommand =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection deps commandDefinition linkedToken
+            let log sqlLog = log deps commandDefinition sqlLog
+            let sw = System.Diagnostics.Stopwatch()
+            use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
                 if wasClosed then
                     do! setupConnection connection linkedToken
+                    ConnectionOpened connection |> log
 
+                CommandPrepared command |> log
+                sw.Start ()
                 use! dataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let! anyData = dataReader.ReadAsync(linkedToken) |> Async.AwaitTask
                 if not anyData then
@@ -330,7 +358,11 @@ module SqlCommand =
                     else
                         return dataReader.GetFieldValue<'Scalar>(0)
             finally
-                if wasClosed then connection.Close()
+                sw.Stop ()
+                CommandExecuted (command, sw.Elapsed) |> log
+                if wasClosed then
+                    connection.Close()
+                    ConnectionClosed connection |> log
         }
 
     /// Execute the command accordingly to its definition and,
@@ -342,10 +374,17 @@ module SqlCommand =
 
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection deps commandDefinition linkedToken
+            let log sqlLog = log deps commandDefinition sqlLog
+            let sw = System.Diagnostics.Stopwatch()
+            use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
-                if wasClosed then do! setupConnection connection linkedToken
+                if wasClosed then
+                    do! setupConnection connection linkedToken
+                    ConnectionOpened connection |> log
+
+                CommandPrepared command |> log
+                sw.Start ()
                 use! dataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let! anyData = dataReader.ReadAsync(linkedToken) |> Async.AwaitTask
                 if not anyData then
@@ -354,7 +393,11 @@ module SqlCommand =
                     if dataReader.IsDBNull(0) then return None
                     else return Some (dataReader.GetFieldValue<'Scalar>(0))
             finally
-                if wasClosed then connection.Close()
+                sw.Stop ()
+                CommandExecuted (command, sw.Elapsed) |> log
+                if wasClosed then
+                    connection.Close()
+                    ConnectionClosed connection |> log
         }
 
     /// Execute the command accordingly to its definition and, return the number of rows affected.
@@ -362,11 +405,22 @@ module SqlCommand =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            use! command = setupCommand connection deps commandDefinition linkedToken
+            let log sqlLog = log deps commandDefinition sqlLog
+            let sw = System.Diagnostics.Stopwatch()
+            use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
-                if wasClosed then do! setupConnection connection linkedToken
+                if wasClosed then
+                    do! setupConnection connection linkedToken
+                    ConnectionOpened connection |> log
+
+                CommandPrepared command |> log
+                sw.Start ()
                 return! command.ExecuteNonQueryAsync(linkedToken) |> Async.AwaitTask
             finally
-                if wasClosed then connection.Close()
+                sw.Stop ()
+                CommandExecuted (command, sw.Elapsed) |> log
+                if wasClosed then
+                    connection.Close()
+                    ConnectionClosed connection |> log
         }
