@@ -163,6 +163,7 @@ module Vp.FSharp.Sql.SqlCommand
                 CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
+                    connectionStopwatch.Stop ()
                     ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
 
@@ -245,6 +246,7 @@ module Vp.FSharp.Sql.SqlCommand
                 CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
+                    connectionStopwatch.Stop ()
                     ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
 
@@ -282,6 +284,7 @@ module Vp.FSharp.Sql.SqlCommand
                 CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
+                    connectionStopwatch.Stop ()
                     ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
 
@@ -309,5 +312,6 @@ module Vp.FSharp.Sql.SqlCommand
                 CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
+                    connectionStopwatch.Stop ()
                     ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
