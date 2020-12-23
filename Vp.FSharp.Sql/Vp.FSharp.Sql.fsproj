@@ -21,7 +21,8 @@
     <Compile Include="Helpers.fs" />
     <Compile Include="TransactionScope.fs" />
     <Compile Include="Transaction.fs" />
-    <Compile Include="Sql.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="SqlCommand.fs" />
   </ItemGroup>
 
   <ItemGroup>
