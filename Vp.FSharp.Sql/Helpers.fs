@@ -1,10 +1,17 @@
 ﻿module internal Vp.FSharp.Sql.Helpers
 
 open System
+open System.Data.Common
 open System.Threading
 open System.Text.RegularExpressions
+open System.Transactions
 
 open FSharp.Control
+
+
+type DbConnection with
+
+    member this.EnlistCurrentTransaction() = this.EnlistTransaction(Transaction.Current)
 
 
 [<RequireQualifiedAccess>]

@@ -2,49 +2,51 @@
 module Vp.FSharp.Sql.TransactionScope
 
 open System
+open System.Data.Common
 open System.Transactions
+
+open Vp.FSharp.Sql.Helpers
 
 
 [<Literal>]
 let DefaultIsolationLevel = IsolationLevel.ReadCommitted
 
 [<Literal>]
-let DefaultScopeOption = TransactionScopeOption.RequiresNew
+let DefaultScopeOption = TransactionScopeOption.Required
 
 [<Literal>]
 let DefaultTimeoutInSeconds = 30.
 
 let defaultTimeout = TimeSpan.FromSeconds(DefaultTimeoutInSeconds)
 
-let complete isolationLevel timeout scopeOption transaction =
+let private execute isolationLevel timeout scopeOption (connection: #DbConnection) apply =
     async {
         let mutable transactionOptions = TransactionOptions()
         transactionOptions.Timeout <- timeout
         transactionOptions.IsolationLevel <- isolationLevel
         use transactionScope = new TransactionScope(scopeOption, transactionOptions, TransactionScopeAsyncFlowOption.Enabled)
-        let! operationsResult = transaction
+        connection.EnlistCurrentTransaction()
+        let! applyOutcome = apply connection
+        return (transactionScope, applyOutcome)
+    }
+
+let complete isolationLevel timeout scopeOption (connection: #DbConnection) apply =
+    async {
+        let! (transactionScope, applyOutcome) = execute isolationLevel timeout scopeOption connection apply
         transactionScope.Complete()
-        return operationsResult
+        return applyOutcome
     }
 
-let notComplete isolationLevel timeout scopeOption transaction =
+let notComplete isolationLevel timeout scopeOption (connection: #DbConnection) apply =
     async {
-        let mutable transactionOptions = TransactionOptions()
-        transactionOptions.Timeout <- timeout
-        transactionOptions.IsolationLevel <- isolationLevel
-        use _ = new TransactionScope(scopeOption, transactionOptions, TransactionScopeAsyncFlowOption.Enabled)
-        let! operationsResult = transaction
-        return operationsResult
+        let! (_, applyOutcome) = execute isolationLevel timeout scopeOption connection apply
+        return! applyOutcome
     }
 
-let completeOnSome isolationLevel timeout scopeOption transaction =
+let completeOnSome isolationLevel timeout scopeOption (connection: #DbConnection) apply =
     async {
-        let mutable transactionOptions = TransactionOptions()
-        transactionOptions.Timeout <- timeout
-        transactionOptions.IsolationLevel <- isolationLevel
-        use transactionScope = new TransactionScope(scopeOption, transactionOptions, TransactionScopeAsyncFlowOption.Enabled)
-        let! operationsResult = transaction
-        match operationsResult with
+        let! (transactionScope, applyOutcome) = execute isolationLevel timeout scopeOption connection apply
+        match applyOutcome with
         | Some some ->
             transactionScope.Complete()
             return Some some
@@ -52,14 +54,10 @@ let completeOnSome isolationLevel timeout scopeOption transaction =
             return None
     }
 
-let completeOnOk isolationLevel timeout scopeOption transaction =
+let completeOnOk isolationLevel timeout scopeOption (connection: #DbConnection) apply =
     async {
-        let mutable transactionOptions = TransactionOptions()
-        transactionOptions.Timeout <- timeout
-        transactionOptions.IsolationLevel <- isolationLevel
-        use transactionScope = new TransactionScope(scopeOption, transactionOptions, TransactionScopeAsyncFlowOption.Enabled)
-        let! operationsResult = transaction
-        match operationsResult with
+        let! (transactionScope, applyOutcome) = execute isolationLevel timeout scopeOption connection apply
+        match applyOutcome with
         | Ok ok ->
             transactionScope.Complete()
             return Ok ok
