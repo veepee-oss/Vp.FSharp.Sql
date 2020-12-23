@@ -1,137 +1,16 @@
-﻿namespace Vp.FSharp.Sql
+﻿[<RequireQualifiedAccess>]
+module Vp.FSharp.Sql.SqlCommand
 
-open System
-open System.Data
-open System.Threading
-open System.Data.Common
+    open System
+    open System.Data
+    open System.Data.Common
+    open System.Diagnostics
+    open System.Threading
 
-open System.Threading.Tasks
+    open FSharp.Control
 
-open FSharp.Control
+    open Vp.FSharp.Sql.Helpers
 
-open Vp.FSharp.Sql.Helpers
-
-
-type Text =
-    | Single of string
-    | Multiple of string list
-
-type SqlLog<'DbConnection, 'DbCommand
-    when 'DbConnection :> DbConnection
-    and 'DbCommand :> DbCommand> =
-    | ConnectionOpened of connection: 'DbConnection
-    | ConnectionClosed of connection: 'DbConnection
-    | CommandPrepared of command: 'DbCommand
-    | CommandExecuted of command: 'DbCommand * sinceOpened: TimeSpan
-
-type LoggerKind<'DbConnection, 'DbCommand
-    when 'DbConnection :> DbConnection
-    and 'DbCommand :> DbCommand> =
-    | Global
-    | Override of (SqlLog<'DbConnection, 'DbCommand> -> unit)
-    | Nothing
-
-type CommandDefinition<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
-    when 'DbConnection :> DbConnection
-    and 'DbTransaction :> DbTransaction
-    and 'DbCommand :> DbCommand
-    and 'DbParameter :> DbParameter
-    and 'DbDataReader :> DbDataReader> =
-    { Text: Text
-      Parameters: (string * 'DbType) list
-      CancellationToken: CancellationToken
-      Timeout: TimeSpan
-      CommandType: CommandType
-      Prepare: bool
-      Transaction: 'DbTransaction option
-      Logger: LoggerKind<'DbConnection, 'DbCommand> }
-
-type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
-    when 'DbConnection :> DbConnection
-    and 'DbTransaction :> DbTransaction
-    and 'DbCommand :> DbCommand
-    and 'DbParameter :> DbParameter
-    and 'DbDataReader :> DbDataReader> = {
-        CreateCommand: 'DbConnection -> 'DbCommand
-        ExecuteReaderAsync: 'DbCommand -> Task<'DbDataReader>
-        DbValueToParameter: string -> 'DbType -> 'DbParameter
-        GlobalLogger: (SqlLog<'DbConnection, 'DbCommand> -> unit) option
-    }
-
-type DbField =
-    { Name: string
-      Index: int32
-      NetTypeName: string
-      NativeTypeName: string }
-
-type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReader: 'DbDataReader) =
-    let mapFieldIndex fieldIndex =
-        { Index = fieldIndex
-          Name = dataReader.GetName(fieldIndex)
-          NetTypeName = dataReader.GetFieldType(fieldIndex).Name
-          NativeTypeName = dataReader.GetDataTypeName(fieldIndex) }
-
-    let cachedFields = [0 .. dataReader.FieldCount - 1] |> List.map mapFieldIndex
-    let cachedFieldsByName = cachedFields |> List.map(fun column -> (column.Name, column)) |> readOnlyDict
-    let cachedFieldsByIndex = cachedFields |> List.map(fun column -> (column.Index, column)) |> readOnlyDict
-
-    let availableFields =
-        cachedFieldsByName
-        |> Seq.mapi (fun index kvp ->
-            sprintf "(%d)[%s:%s|%s]" index kvp.Key kvp.Value.NetTypeName kvp.Value.NativeTypeName)
-        |> String.concat ", "
-
-    let failToReadColumnByName columnName columnTypeName =
-        failwithf "Could not read field '%s' as %s. Available fields are %s"
-            columnName columnTypeName availableFields
-
-    let failToReadColumnByIndex columnIndex columnTypeName =
-        failwithf "Could not read field at index %d as %s. Available fields are %s"
-            columnIndex columnTypeName availableFields
-
-    member this.ColumnsByName = cachedFieldsByName
-    member this.ColumnsByIndex = cachedFieldsByIndex
-    member this.Count = dataReader.FieldCount
-
-    member this.Value<'T> (columnName: string) =
-        match cachedFieldsByName.TryGetValue(columnName) with
-            | true, column ->
-                // https://github.com/npgsql/npgsql/issues/2087
-                if dataReader.IsDBNull(columnName) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
-                else dataReader.GetFieldValue<'T>(column.Index)
-            | false, _ ->
-                failToReadColumnByName columnName typeof<'T>.Name
-
-    member this.ValueOrNone<'T> (columnName: string) =
-        match cachedFieldsByName.TryGetValue(columnName) with
-        | true, column ->
-            if dataReader.IsDBNull(column.Index) then None
-            else Some (dataReader.GetFieldValue<'T>(column.Index))
-        | false, _ ->
-            failToReadColumnByName columnName typeof<'T>.Name
-
-    member this.Value<'T> (columnIndex: int32) =
-        match cachedFieldsByIndex.TryGetValue(columnIndex) with
-            | true, column ->
-                // https://github.com/npgsql/npgsql/issues/2087
-                if dataReader.IsDBNull(columnIndex) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
-                else dataReader.GetFieldValue<'T>(column.Index)
-            | false, _ ->
-                failToReadColumnByIndex columnIndex typeof<'T>.Name
-
-    member this.ValueOrNone<'T> (columnIndex: int32) =
-        match cachedFieldsByIndex.TryGetValue(columnIndex) with
-        | true, column ->
-            if dataReader.IsDBNull(column.Index) then None
-            else Some (dataReader.GetFieldValue<'T>(column.Index))
-        | false, _ ->
-            failToReadColumnByIndex columnIndex typeof<'T>.Name
-
-exception SqlNoDataAvailableException
-
-
-[<RequireQualifiedAccess>]
-module SqlCommand =
 
     [<Literal>]
     let DefaultTimeoutInSeconds = 30.
@@ -238,7 +117,7 @@ module SqlCommand =
                     return { state with Continue = false }
         }
 
-    let private log deps commandDefinition sqlLog =
+    let private log4 deps commandDefinition sqlLog =
         match commandDefinition.Logger with
         | Global -> deps.GlobalLogger
         | Override logging -> Some logging
@@ -251,17 +130,19 @@ module SqlCommand =
         asyncSeq {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log deps commandDefinition sqlLog
-            let sw = System.Diagnostics.Stopwatch()
+            let log sqlLog = log4 deps commandDefinition sqlLog
+            let connectionStopwatch = Stopwatch()
+            let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
                 if wasClosed then
                     do! setupConnection connection linkedToken
+                    connectionStopwatch.Start()
                     ConnectionOpened connection |> log
 
                 CommandPrepared command |> log
-                sw.Start ()
+                commandStopwatch.Start ()
                 use! dbDataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let items =
                     AsyncSeq.initInfinite(fun _ -> (dbDataReader, linkedToken))
@@ -278,11 +159,11 @@ module SqlCommand =
                 yield! items
 
             finally
-                sw.Stop ()
-                CommandExecuted (command, sw.Elapsed) |> log
+                commandStopwatch.Stop ()
+                CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
-                    ConnectionClosed connection |> log
+                    ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
 
     /// Return the sets of rows as a list accordingly to the command definition.
@@ -336,17 +217,19 @@ module SqlCommand =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log deps commandDefinition sqlLog
-            let sw = System.Diagnostics.Stopwatch()
+            let log sqlLog = log4 deps commandDefinition sqlLog
+            let connectionStopwatch = Stopwatch()
+            let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
                 if wasClosed then
                     do! setupConnection connection linkedToken
+                    connectionStopwatch.Start()
                     ConnectionOpened connection |> log
 
                 CommandPrepared command |> log
-                sw.Start ()
+                commandStopwatch.Start ()
                 use! dataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let! anyData = dataReader.ReadAsync(linkedToken) |> Async.AwaitTask
                 if not anyData then
@@ -358,11 +241,11 @@ module SqlCommand =
                     else
                         return dataReader.GetFieldValue<'Scalar>(0)
             finally
-                sw.Stop ()
-                CommandExecuted (command, sw.Elapsed) |> log
+                commandStopwatch.Stop ()
+                CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
-                    ConnectionClosed connection |> log
+                    ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
 
     /// Execute the command accordingly to its definition and,
@@ -374,17 +257,19 @@ module SqlCommand =
 
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log deps commandDefinition sqlLog
-            let sw = System.Diagnostics.Stopwatch()
+            let log sqlLog = log4 deps commandDefinition sqlLog
+            let connectionStopwatch = Stopwatch()
+            let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
                 if wasClosed then
                     do! setupConnection connection linkedToken
+                    connectionStopwatch.Start()
                     ConnectionOpened connection |> log
 
                 CommandPrepared command |> log
-                sw.Start ()
+                commandStopwatch.Start ()
                 use! dataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let! anyData = dataReader.ReadAsync(linkedToken) |> Async.AwaitTask
                 if not anyData then
@@ -393,11 +278,11 @@ module SqlCommand =
                     if dataReader.IsDBNull(0) then return None
                     else return Some (dataReader.GetFieldValue<'Scalar>(0))
             finally
-                sw.Stop ()
-                CommandExecuted (command, sw.Elapsed) |> log
+                commandStopwatch.Stop ()
+                CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
-                    ConnectionClosed connection |> log
+                    ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
 
     /// Execute the command accordingly to its definition and, return the number of rows affected.
@@ -405,22 +290,24 @@ module SqlCommand =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log deps commandDefinition sqlLog
-            let sw = System.Diagnostics.Stopwatch()
+            let log sqlLog = log4 deps commandDefinition sqlLog
+            let connectionStopwatch = Stopwatch()
+            let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
 
             try
                 if wasClosed then
                     do! setupConnection connection linkedToken
+                    connectionStopwatch.Start()
                     ConnectionOpened connection |> log
 
                 CommandPrepared command |> log
-                sw.Start ()
+                commandStopwatch.Start ()
                 return! command.ExecuteNonQueryAsync(linkedToken) |> Async.AwaitTask
             finally
-                sw.Stop ()
-                CommandExecuted (command, sw.Elapsed) |> log
+                commandStopwatch.Stop ()
+                CommandExecuted (command, commandStopwatch.Elapsed) |> log
                 if wasClosed then
                     connection.Close()
-                    ConnectionClosed connection |> log
+                    ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
