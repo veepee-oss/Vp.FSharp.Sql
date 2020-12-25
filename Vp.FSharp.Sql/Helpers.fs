@@ -4,18 +4,19 @@ open System
 open System.Data.Common
 open System.Threading
 open System.Text.RegularExpressions
+open System.Threading.Tasks
 open System.Transactions
 
 open FSharp.Control
 
 
-type DbConnection with
+type internal DbConnection with
 
-    member this.EnlistCurrentTransaction() = this.EnlistTransaction(Transaction.Current)
+    member internal this.EnlistCurrentTransaction() = this.EnlistTransaction(Transaction.Current)
 
 
 [<RequireQualifiedAccess>]
-module String =
+module internal String =
 
     [<Literal>]
     let ConnectionStringSeparator = ";"
@@ -32,11 +33,16 @@ module String =
 
     let stitch strs = String.concat SqlNewLineConstant strs
 
-let def<'T> = Unchecked.defaultof<'T>
+let internal def<'T> = Unchecked.defaultof<'T>
+
+[<AbstractClass; Sealed>]
+type internal Async private () =
+    static member AwaitValueTask(valueTask: ValueTask) = valueTask.AsTask() |> Async.AwaitTask
+    static member AwaitValueTask(valueTask: ValueTask<'T>) = valueTask.AsTask() |> Async.AwaitTask
 
 
 [<RequireQualifiedAccess>]
-module Async =
+module internal Async =
     let linkedTokenSourceFrom cancellationToken =
         async {
             let! token = Async.CancellationToken
@@ -45,7 +51,7 @@ module Async =
         }
 
 [<RequireQualifiedAccess>]
-module AsyncSeq =
+module internal AsyncSeq =
 
     let mapbi mapping source =
         source
@@ -70,7 +76,7 @@ module AsyncSeq =
 
     let consume source = AsyncSeq.iter(fun _ -> ()) source
 
-module DbNull =
+module internal DbNull =
     let is<'T>() = typedefof<'T> = typedefof<DBNull>
 
     let retypedAs<'T>() = DBNull.Value :> obj :?> 'T
