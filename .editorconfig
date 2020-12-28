@@ -1,0 +1,13 @@
+root=true
+# https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference
+###############################
+# Core EditorConfig Options   #
+###############################
+
+[*.{fs,fsi,fsx}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
