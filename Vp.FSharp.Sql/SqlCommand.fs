@@ -29,7 +29,7 @@ module Vp.FSharp.Sql.SqlCommand
           CommandType = DefaultCommandType
           Prepare = DefaultPrepare
           Transaction = None
-          Logger = Nothing }
+          Logger = Global }
 
     /// Initialize a command definition with the given text contained in the given string.
     let text value = { defaultCommandDefinition() with Text = Text.Single value }
