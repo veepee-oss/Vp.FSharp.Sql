@@ -11,7 +11,7 @@
     <Compile Include="Mocks.fs" />
     <Compile Include="Transaction should.fs" />
     <Compile Include="TransactionScope should.fs" />
-    <Compile Include="SqlCommand shoud.fs" />
+    <Compile Include="SqlCommand should.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
