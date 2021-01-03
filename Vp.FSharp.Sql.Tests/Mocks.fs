@@ -7,11 +7,38 @@ open System.Data.Common
 
 open Vp.FSharp.Sql
 
+type DbField' =
+    { Name: string
+      FieldType: Type
+      NativeTypeName: string }
 
 type Data = {
-    Columns: string list
-    Values: Object list list
+    Columns: DbField' list list
+    GetValues: int -> int -> Object list
+    CountRows: int -> int
+    CountResultSets: int
 }
+
+let fakeData values columns =
+    { Columns = columns
+      GetValues =
+        fun resultSetIndex rowIndex ->
+            match (resultSetIndex, rowIndex) with
+            | (resultSetIndex, rowIndex)
+                when resultSetIndex >= 0
+                     && resultSetIndex < List.length values
+                     && rowIndex >= 0
+                     && rowIndex < List.length values.[resultSetIndex]
+                -> values.[resultSetIndex].[rowIndex]
+            | _ -> sprintf "get values: out of resultSetIndex %i or rowIndex %i" resultSetIndex rowIndex |> failwith
+      CountRows =
+        fun resultSetIndex ->
+            match resultSetIndex with
+            | resultSetIndex when resultSetIndex >= 0 && resultSetIndex < List.length values
+                -> List.length values.[resultSetIndex]
+            | _ -> sprintf "count rows: out of resultSetIndex %i" resultSetIndex |> failwith
+      CountResultSets = List.length values
+    }
 
 let makeDependencies (valToParam: (string -> 'a -> 'b) option) logger = {
     CreateCommand = (fun connection -> connection.CreateCommand())
@@ -21,21 +48,28 @@ let makeDependencies (valToParam: (string -> 'a -> 'b) option) logger = {
 }
 
 let makeReader data _ =
+    let mutable currentRowIndex = -1
+    let mutable currentResultSetIndex = 0
     { new DbDataReader()
         with
         member this.Depth with get() = 0
-        member this.FieldCount with get() = 0
-        member this.HasRows with get() = true
+        member this.FieldCount with get() =
+            List.length data.Columns.[currentResultSetIndex]
+        member this.HasRows with get() =
+            data.CountRows currentResultSetIndex > 0
         member this.IsClosed with get() = true
         member this.RecordsAffected with get() = 0
         member this.Item
             with get(ordinal: int):Object = null
         member this.Item
             with get(name: string):Object = null
-        member this.GetDataTypeName (ordinal: int) = ""
+        member this.GetDataTypeName (ordinal: int) =
+            data.Columns.[currentResultSetIndex].[ordinal].NativeTypeName
         member this.GetEnumerator () = null
-        member this.GetFieldType (ordinal: int) = null
-        member this.GetName (ordinal: int) = ""
+        member this.GetFieldType (ordinal: int) =
+            data.Columns.[currentResultSetIndex].[ordinal].FieldType
+        member this.GetName (ordinal: int) =
+            data.Columns.[currentResultSetIndex].[ordinal].Name
         member this.GetOrdinal (name: string) = 0
         member this.GetBoolean (ordinal: int) = true
         member this.GetByte (ordinal: int) = 0uy
@@ -51,11 +85,18 @@ let makeReader data _ =
         member this.GetInt32 (ordinal: int) = 0
         member this.GetInt64 (ordinal: int) = 0L
         member this.GetString (ordinal: int) = ""
-        member this.GetValue (ordinal: int) = null
+        member this.GetValue (ordinal: int) =
+            (data.GetValues currentResultSetIndex currentRowIndex).[ordinal]
         member this.GetValues values = 0
-        member this.IsDBNull (ordinal: int) = false
-        member this.NextResult () = true
-        member this.Read () = true
+        member this.IsDBNull (ordinal: int) =
+            (data.GetValues currentResultSetIndex currentRowIndex).[ordinal] = null
+        member this.NextResult () =
+            currentResultSetIndex <- currentResultSetIndex + 1
+            currentRowIndex <- -1
+            currentResultSetIndex < data.CountResultSets
+        member this.Read () =
+            currentRowIndex <- currentRowIndex + 1
+            currentRowIndex < data.CountRows currentResultSetIndex
     }
 
 let makeCommand connection callBackReader =
