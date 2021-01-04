@@ -41,9 +41,10 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader -> [2;1;0]
-                                      |> List.map (sprintf "id%i")
-                                      |> List.map (fun fieldName -> (fieldName, reader.Value fieldName |> int))
+                   (fun _ _ reader ->
+                        [2;1;0]
+                        |> List.map (sprintf "id%i")
+                        |> List.map (fun fieldName -> (fieldName, reader.Value fieldName |> int))
                    )
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> snd values.[0])
@@ -85,9 +86,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader -> [2;1;0]
-                                      |> List.map (reader.Value >> int)
-                   )
+                   (fun _ _ reader -> [2;1;0] |> List.map (reader.Value >> int))
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
@@ -128,9 +127,10 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader -> [2;1;0]
-                                      |> List.map (sprintf "id%i")
-                                      |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int))
+                   (fun _ _ reader ->
+                       [2;1;0]
+                       |> List.map (sprintf "id%i")
+                       |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int))
                    )
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> snd values.[0])
@@ -172,9 +172,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader -> [2;1;0]
-                                      |> List.map (reader.ValueOrNone >> Option.map int)
-                   )
+                   (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
@@ -184,36 +182,48 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
     }
 
 [<Fact>]
-let ``executeScalar should let the connection when it's other than closed`` () =
+let ``queryAsyncSeq should let the connection when it's other than closed with access valueOrNone by ordinal`` () =
     let openCall = ref 0
     let closeCall = ref 0
     let openCallback () = incr openCall
     let closeCallback () = incr closeCall
     let data = Mocks.fakeData
                 [[
-                        [15]
+                        [1;null;3]
+                        [4;5;6]
                 ]]
                 [[
-                    { Name = "id"
+                    { Name = "id0"
+                      FieldType = typeof<int>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id1"
+                      FieldType = typeof<int Nullable>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id2"
                       FieldType = typeof<int>
                       NativeTypeName = typeof<int>.Name
                     }
                 ]]
-
     async {
         use connection =
             Mocks.makeReader data
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
-        let! r = SqlCommand.text "select 1"
-                |> SqlCommand.noLogger
-                |> SqlCommand.executeScalar connection (Mocks.makeDependencies None None)
-        r =! 15
+        let r = SqlCommand.text "select 1"
+                 |> SqlCommand.noLogger
+                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
+                    (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
+                 |> AsyncSeq.toListSynchronously
+                 |> List.sortBy (fun values -> values.[0])
+        r.Length =! 2
+        r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
         !openCall =! 0
         !closeCall =! 0
     }
 
 [<Fact>]
-let ``executeScalar should log for all events on globalLogger when the connection is closed`` () =
+let ``queryAsyncSeq should log for all events on globalLogger when the connection is closed with access valueOrNone by ordinal`` () =
     let openCall = ref 0
     let closeCall = ref 0
     let openCallback () = incr openCall
@@ -230,10 +240,19 @@ let ``executeScalar should log for all events on globalLogger when the connectio
         | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
-                        [16]
+                        [1;null;3]
+                        [4;5;6]
                 ]]
                 [[
-                    { Name = "id"
+                    { Name = "id0"
+                      FieldType = typeof<int>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id1"
+                      FieldType = typeof<int Nullable>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id2"
                       FieldType = typeof<int>
                       NativeTypeName = typeof<int>.Name
                     }
@@ -244,9 +263,13 @@ let ``executeScalar should log for all events on globalLogger when the connectio
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
-        let! r = SqlCommand.text "select 1"
-                |> SqlCommand.executeScalar connection deps
-        r =! 16
+        let r = SqlCommand.text "select 1"
+                 |> SqlCommand.queryAsyncSeq connection deps
+                    (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
+                 |> AsyncSeq.toListSynchronously
+                 |> List.sortBy (fun values -> values.[0])
+        r.Length =! 2
+        r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
         !openCall =! 1
         !closeCall =! 1
         !connectionOpened =! 1
@@ -256,7 +279,7 @@ let ``executeScalar should log for all events on globalLogger when the connectio
     }
 
 [<Fact>]
-let ``executeScalar should log for just command events on globalLogger when the connection is NOT closed`` () =
+let ``queryAsyncSeq should log for just command events on globalLogger when the connection is NOT closed with access valueOrNone by ordinal`` () =
     let openCall = ref 0
     let closeCall = ref 0
     let openCallback () = incr openCall
@@ -273,10 +296,19 @@ let ``executeScalar should log for just command events on globalLogger when the 
         | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
-                        [17]
+                        [1;null;3]
+                        [4;5;6]
                 ]]
                 [[
-                    { Name = "id"
+                    { Name = "id0"
+                      FieldType = typeof<int>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id1"
+                      FieldType = typeof<int Nullable>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id2"
                       FieldType = typeof<int>
                       NativeTypeName = typeof<int>.Name
                     }
@@ -287,9 +319,13 @@ let ``executeScalar should log for just command events on globalLogger when the 
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
-        let! r = SqlCommand.text "select 1"
-                |> SqlCommand.executeScalar connection deps
-        r =! 17
+        let r = SqlCommand.text "select 1"
+                |> SqlCommand.queryAsyncSeq connection deps
+                   (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
+                |> AsyncSeq.toListSynchronously
+                |> List.sortBy (fun values -> values.[0])
+        r.Length =! 2
+        r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
         !openCall =! 0
         !closeCall =! 0
         !connectionOpened =! 0
