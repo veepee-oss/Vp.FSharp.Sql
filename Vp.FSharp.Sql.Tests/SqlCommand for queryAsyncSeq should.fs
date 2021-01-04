@@ -1,5 +1,6 @@
 module Vp.FSharp.Sql.Tests.``SqlCommand for queryAsyncSeq should``
 
+open System
 open System.Data
 open FSharp.Control
 open Swensen.Unquote
@@ -91,6 +92,93 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
         r =! [[3;2;1];[6;5;4]]
+        !openCall =! 1
+        !closeCall =! 1
+    }
+
+[<Fact>]
+let ``queryAsyncSeq should open and close the connection when it's closed and access valueOrNone by columnName`` () =
+    let openCall = ref 0
+    let closeCall = ref 0
+    let openCallback () = incr openCall
+    let closeCallback () = incr closeCall
+    let data = Mocks.fakeData
+                [[
+                        [1;null;3]
+                        [4;5;6]
+                ]]
+                [[
+                    { Name = "id0"
+                      FieldType = typeof<int>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id1"
+                      FieldType = typeof<int Nullable>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id2"
+                      FieldType = typeof<int>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                ]]
+    async {
+        use connection =
+            Mocks.makeReader data
+            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+        let r = SqlCommand.text "select 1"
+                |> SqlCommand.noLogger
+                |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
+                   (fun _ _ reader -> [2;1;0]
+                                      |> List.map (sprintf "id%i")
+                                      |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int))
+                   )
+                |> AsyncSeq.toListSynchronously
+                |> List.sortBy (fun values -> snd values.[0])
+        r.Length =! 2
+        r =! [[("id2", Some 3);("id1", None);("id0", Some 1)];[("id2", Some 6);("id1", Some 5);("id0", Some 4)]]
+        !openCall =! 1
+        !closeCall =! 1
+    }
+
+[<Fact>]
+let ``queryAsyncSeq should open and close the connection when it's closed and access valueOrNone by ordinal`` () =
+    let openCall = ref 0
+    let closeCall = ref 0
+    let openCallback () = incr openCall
+    let closeCallback () = incr closeCall
+    let data = Mocks.fakeData
+                [[
+                        [1;null;3]
+                        [4;5;6]
+                ]]
+                [[
+                    { Name = "id0"
+                      FieldType = typeof<int>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id1"
+                      FieldType = typeof<int Nullable>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                    { Name = "id2"
+                      FieldType = typeof<int>
+                      NativeTypeName = typeof<int>.Name
+                    }
+                ]]
+    async {
+        use connection =
+            Mocks.makeReader data
+            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+        let r = SqlCommand.text "select 1"
+                |> SqlCommand.noLogger
+                |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
+                   (fun _ _ reader -> [2;1;0]
+                                      |> List.map (reader.ValueOrNone >> Option.map int)
+                   )
+                |> AsyncSeq.toListSynchronously
+                |> List.sortBy (fun values -> values.[0])
+        r.Length =! 2
+        r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
         !openCall =! 1
         !closeCall =! 1
     }
