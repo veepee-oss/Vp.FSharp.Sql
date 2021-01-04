@@ -1,7 +1,9 @@
 module Vp.FSharp.Sql.Tests.``SqlCommand for executeScalarOrNone should``
 
 open System.Data
+
 open Swensen.Unquote
+
 open Xunit
 
 open Vp.FSharp.Sql
@@ -84,10 +86,10 @@ let ``executeScalarOrNone should log for all events on globalLogger when the con
     let commandExecuted = ref 0
     let loggerCallback =
         function
-        | ConnectionOpened connection -> incr connectionOpened
-        | ConnectionClosed (connection, sinceOpened) -> incr connectionClosed
-        | CommandPrepared command -> incr commandPrepared
-        | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
+        | ConnectionOpened _ -> incr connectionOpened
+        | ConnectionClosed _ -> incr connectionClosed
+        | CommandPrepared _ -> incr commandPrepared
+        | CommandExecuted _ -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
                         [16]
@@ -130,10 +132,10 @@ let ``executeScalarOrNone should log for just command events on globalLogger whe
     let commandExecuted = ref 0
     let loggerCallback =
         function
-        | ConnectionOpened connection -> incr connectionOpened
-        | ConnectionClosed (connection, sinceOpened) -> incr connectionClosed
-        | CommandPrepared command -> incr commandPrepared
-        | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
+        | ConnectionOpened _ -> incr connectionOpened
+        | ConnectionClosed _ -> incr connectionClosed
+        | CommandPrepared _ -> incr commandPrepared
+        | CommandExecuted _ -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
                         [17]
@@ -235,10 +237,10 @@ let ``executeScalarOrNone should log for all events on globalLogger when the con
     let commandExecuted = ref 0
     let loggerCallback =
         function
-        | ConnectionOpened connection -> incr connectionOpened
-        | ConnectionClosed (connection, sinceOpened) -> incr connectionClosed
-        | CommandPrepared command -> incr commandPrepared
-        | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
+        | ConnectionOpened _ -> incr connectionOpened
+        | ConnectionClosed _ -> incr connectionClosed
+        | CommandPrepared _ -> incr commandPrepared
+        | CommandExecuted _ -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
                         [null]
@@ -278,10 +280,10 @@ let ``executeScalarOrNone should log for just command events on globalLogger whe
     let commandExecuted = ref 0
     let loggerCallback =
         function
-        | ConnectionOpened connection -> incr connectionOpened
-        | ConnectionClosed (connection, sinceOpened) -> incr connectionClosed
-        | CommandPrepared command -> incr commandPrepared
-        | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
+        | ConnectionOpened _ -> incr connectionOpened
+        | ConnectionClosed _ -> incr connectionClosed
+        | CommandPrepared _ -> incr commandPrepared
+        | CommandExecuted _ -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
                         [null]
