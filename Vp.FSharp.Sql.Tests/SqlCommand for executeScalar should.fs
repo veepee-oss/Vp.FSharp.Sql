@@ -1,54 +1,10 @@
-module Vp.FSharp.Sql.Tests.``SqlCommand should``
+module Vp.FSharp.Sql.Tests.``SqlCommand for executeScalar should``
 
 open System.Data
-open FSharp.Control
 open Swensen.Unquote
 open Xunit
 
 open Vp.FSharp.Sql
-
-
-[<Fact>]
-let ``queryAsyncSeq should open and close the connection when it's closed`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
-    let data = Mocks.fakeData
-                [[
-                        [1;2;3]
-                        [4;5;6]
-                ]]
-                [[
-                    { Name = "id"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
-                    }
-                    { Name = "id2"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
-                    }
-                    { Name = "id3"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
-                    }
-                ]]
-    async {
-        use connection =
-            Mocks.makeReader data
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let r = SqlCommand.text "select 1"
-                |> SqlCommand.noLogger
-                |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                       (fun _ _ reader ->
-                            (reader.Value 0 |> int, reader.Value 2 |> int))
-                |> AsyncSeq.toListSynchronously
-                |> List.sortBy id
-        r.Length =! 2
-        r =! [(1,3);(4,6)]
-        !openCall =! 1
-        !closeCall =! 1
-    }
 
 
 [<Fact>]
