@@ -2,8 +2,11 @@ module Vp.FSharp.Sql.Tests.``SqlCommand for queryAsyncSeq should``
 
 open System
 open System.Data
+
 open FSharp.Control
+
 open Swensen.Unquote
+
 open Xunit
 
 open Vp.FSharp.Sql
@@ -234,10 +237,10 @@ let ``queryAsyncSeq should log for all events on globalLogger when the connectio
     let commandExecuted = ref 0
     let loggerCallback =
         function
-        | ConnectionOpened connection -> incr connectionOpened
-        | ConnectionClosed (connection, sinceOpened) -> incr connectionClosed
-        | CommandPrepared command -> incr commandPrepared
-        | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
+        | ConnectionOpened _ -> incr connectionOpened
+        | ConnectionClosed _ -> incr connectionClosed
+        | CommandPrepared _ -> incr commandPrepared
+        | CommandExecuted _ -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -290,10 +293,10 @@ let ``queryAsyncSeq should log for just command events on globalLogger when the 
     let commandExecuted = ref 0
     let loggerCallback =
         function
-        | ConnectionOpened connection -> incr connectionOpened
-        | ConnectionClosed (connection, sinceOpened) -> incr connectionClosed
-        | CommandPrepared command -> incr commandPrepared
-        | CommandExecuted (connection, sincePrepared) -> incr commandExecuted
+        | ConnectionOpened _ -> incr connectionOpened
+        | ConnectionClosed _ -> incr connectionClosed
+        | CommandPrepared _ -> incr commandPrepared
+        | CommandExecuted _ -> incr commandExecuted
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
