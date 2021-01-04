@@ -2,15 +2,35 @@ module Vp.FSharp.Sql.Tests.``SqlCommand for queryAsyncSeq should``
 
 open System
 open System.Data
-
+open System.Data.Common
 open FSharp.Control
-
 open Swensen.Unquote
-
 open Xunit
 
 open Vp.FSharp.Sql
 
+
+let toFieldName =
+    sprintf "id%i"
+
+let toFieldNames =
+    List.map toFieldName
+
+let readValueByFieldName (columns: string list) _ _ (reader: SqlRecordReader<DbDataReader>) =
+    columns
+    |> List.map (fun fieldName -> (fieldName, reader.Value fieldName |> int))
+
+let readValueByIndex (columns: int list) _ _ (reader: SqlRecordReader<DbDataReader>) =
+    columns
+    |> List.map (reader.Value >> int)
+
+let readValueOrNoneByFieldName (columns: string list) _ _ (reader: SqlRecordReader<DbDataReader>) =
+    columns
+    |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int))
+
+let readValueOrNoneByIndex (columns: int list) _ _ (reader: SqlRecordReader<DbDataReader>) =
+    columns
+    |> List.map (reader.ValueOrNone >> Option.map int)
 
 [<Fact>]
 let ``queryAsyncSeq should open and close the connection when it's closed and access value by columnName`` () =
@@ -44,11 +64,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader ->
-                        [2;1;0]
-                        |> List.map (sprintf "id%i")
-                        |> List.map (fun fieldName -> (fieldName, reader.Value fieldName |> int))
-                   )
+                   (readValueByFieldName ([2;1;0] |> toFieldNames))
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> snd values.[0])
         r.Length =! 2
@@ -89,7 +105,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader -> [2;1;0] |> List.map (reader.Value >> int))
+                   (readValueByIndex [2;1;0])
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
@@ -130,11 +146,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader ->
-                       [2;1;0]
-                       |> List.map (sprintf "id%i")
-                       |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int))
-                   )
+                   (readValueOrNoneByFieldName (toFieldNames [2;1;0]))
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> snd values.[0])
         r.Length =! 2
@@ -175,7 +187,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
                 |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                   (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
+                   (readValueOrNoneByIndex [2;1;0])
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
@@ -216,7 +228,7 @@ let ``queryAsyncSeq should let the connection when it's other than closed with a
         let r = SqlCommand.text "select 1"
                  |> SqlCommand.noLogger
                  |> SqlCommand.queryAsyncSeq connection (Mocks.makeDependencies None None)
-                    (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
+                   (readValueOrNoneByIndex [2;1;0])
                  |> AsyncSeq.toListSynchronously
                  |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
@@ -268,7 +280,7 @@ let ``queryAsyncSeq should log for all events on globalLogger when the connectio
                    |> Mocks.makeDependencies None
         let r = SqlCommand.text "select 1"
                  |> SqlCommand.queryAsyncSeq connection deps
-                    (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
+                   (readValueOrNoneByIndex [2;1;0])
                  |> AsyncSeq.toListSynchronously
                  |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
@@ -324,7 +336,7 @@ let ``queryAsyncSeq should log for just command events on globalLogger when the 
                    |> Mocks.makeDependencies None
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.queryAsyncSeq connection deps
-                   (fun _ _ reader -> [2;1;0] |> List.map (reader.ValueOrNone >> Option.map int))
+                   (readValueOrNoneByIndex [2;1;0])
                 |> AsyncSeq.toListSynchronously
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
