@@ -38,10 +38,4 @@
     <ProjectReference Include="..\Vp.FSharp.Sql\Vp.FSharp.Sql.fsproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="JetBrains.ReSharper.TestRunner.Merged, Version=1.2.7.47, Culture=neutral, PublicKeyToken=5c492ec4f3eccde3">
-      <HintPath>..\..\..\.local\share\JetBrains\Toolbox\apps\Rider\ch-0\203.6682.13\lib\ReSharperHost\TestRunner\netcoreapp2.0\JetBrains.ReSharper.TestRunner.Merged.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
