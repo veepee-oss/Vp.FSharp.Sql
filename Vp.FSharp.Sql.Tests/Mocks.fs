@@ -14,14 +14,14 @@ type DbField' =
 
 type Data = {
     Columns: DbField' list list
-    GetValues: int -> int -> Object list
-    CountRows: int -> int
-    CountResultSets: int
+    GetValues: int32 -> int32 -> Object list
+    CountRows: int32 -> int32
+    CountResultSets: int32
 }
 
 type Response =
     | Reader of (CommandBehavior -> DbDataReader)
-    | NonQuery of int
+    | NonQuery of int32
 
 let fakeData values columns =
     { Columns = columns

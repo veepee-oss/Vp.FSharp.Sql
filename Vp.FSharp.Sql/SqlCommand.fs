@@ -71,10 +71,9 @@ module Vp.FSharp.Sql.SqlCommand
         async {
             let command = deps.CreateCommand connection
 
-            Option.map
+            Option.iter
                 (fun transaction -> command.Transaction <- transaction)
                 (commandDefinition.Transaction)
-            |> ignore
 
             match commandDefinition.Text with
             | Single value -> command.CommandText <- String.trimLeft value
@@ -122,8 +121,7 @@ module Vp.FSharp.Sql.SqlCommand
         | Global -> deps.GlobalLogger
         | Override logging -> Some logging
         | Nothing -> None
-        |> Option.map (fun callback -> sqlLog |> callback)
-        |> ignore
+        |> Option.iter (fun f -> f sqlLog)
 
     /// Return the sets of rows as an AsyncSeq accordingly to the command definition.
     let queryAsyncSeq (connection: #DbConnection) deps read commandDefinition =

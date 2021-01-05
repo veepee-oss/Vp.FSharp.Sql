@@ -20,7 +20,7 @@ let private makeDbField index : Mocks.DbField' =
       NativeTypeName = typeof<int>.Name
     }
 
-let private readValueByIndex (columns: int list list) indexColumn _ (reader: SqlRecordReader<DbDataReader>) =
+let private readValueByIndex (columns: int32 list list) indexColumn _ (reader: SqlRecordReader<DbDataReader>) =
     columns.[indexColumn]
     |> List.map (reader.Value >> int)
 
