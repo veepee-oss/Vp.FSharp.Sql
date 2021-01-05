@@ -1,9 +1,7 @@
 module Vp.FSharp.Sql.Tests.``SqlCommand for executeScalar should``
 
 open System.Data
-
 open Swensen.Unquote
-
 open Xunit
 
 open Vp.FSharp.Sql

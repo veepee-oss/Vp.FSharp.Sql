@@ -13,6 +13,7 @@
     <Compile Include="TransactionScope should.fs" />
     <Compile Include="SqlCommand for executeNonQuery should.fs" />
     <Compile Include="SqlCommand for executeScalar should.fs" />
+    <Compile Include="SqlCommand for querySetListN should.fs" />
     <Compile Include="SqlCommand for queryAsyncSeq should.fs" />
     <Compile Include="SqlCommand for executeScalarOrNone should.fs" />
     <Compile Include="Program.fs" />
