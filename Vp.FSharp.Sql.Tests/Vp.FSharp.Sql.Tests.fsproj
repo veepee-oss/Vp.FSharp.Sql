@@ -9,8 +9,6 @@
 
   <ItemGroup>
     <Compile Include="Mocks.fs" />
-    <Compile Include="Transaction should.fs" />
-    <Compile Include="TransactionScope should.fs" />
     <Compile Include="SqlCommand for executeNonQuery should.fs" />
     <Compile Include="SqlCommand for executeScalar should.fs" />
     <Compile Include="SqlCommand for querySetListN should.fs" />
