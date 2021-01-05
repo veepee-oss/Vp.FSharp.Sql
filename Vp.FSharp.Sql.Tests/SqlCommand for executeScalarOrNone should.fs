@@ -28,7 +28,7 @@ let ``executeScalarOrNone should open and close the connection when it's closed`
 
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let! r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -60,7 +60,7 @@ let ``executeScalarOrNone should let the connection when it's other than closed`
 
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let! r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -102,7 +102,7 @@ let ``executeScalarOrNone should log for all events on globalLogger when the con
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
@@ -148,7 +148,7 @@ let ``executeScalarOrNone should log for just command events on globalLogger whe
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
@@ -186,7 +186,7 @@ let ``executeScalarOrNone should open and close the connection when it's closed 
 
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let! r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -215,7 +215,7 @@ let ``executeScalarOrNone should let the connection when it's other than closed 
 
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let! r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -253,7 +253,7 @@ let ``executeScalarOrNone should log for all events on globalLogger when the con
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
@@ -296,7 +296,7 @@ let ``executeScalarOrNone should log for just command events on globalLogger whe
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
