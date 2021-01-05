@@ -20,7 +20,7 @@ let readValueByFieldName (columns: string list) _ _ (reader: SqlRecordReader<DbD
     columns
     |> List.map (fun fieldName -> (fieldName, reader.Value fieldName |> int))
 
-let readValueByIndex (columns: int list) _ _ (reader: SqlRecordReader<DbDataReader>) =
+let readValueByIndex (columns: int32 list) _ _ (reader: SqlRecordReader<DbDataReader>) =
     columns
     |> List.map (reader.Value >> int)
 
@@ -28,7 +28,7 @@ let readValueOrNoneByFieldName (columns: string list) _ _ (reader: SqlRecordRead
     columns
     |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int))
 
-let readValueOrNoneByIndex (columns: int list) _ _ (reader: SqlRecordReader<DbDataReader>) =
+let readValueOrNoneByIndex (columns: int32 list) _ _ (reader: SqlRecordReader<DbDataReader>) =
     columns
     |> List.map (reader.ValueOrNone >> Option.map int)
 
