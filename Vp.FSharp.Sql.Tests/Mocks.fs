@@ -19,6 +19,10 @@ type Data = {
     CountResultSets: int
 }
 
+type Response =
+    | Reader of (CommandBehavior -> DbDataReader)
+    | NonQuery of int
+
 let fakeData values columns =
     { Columns = columns
       GetValues =
@@ -99,7 +103,7 @@ let makeReader data _ =
             currentRowIndex < data.CountRows currentResultSetIndex
     }
 
-let makeCommand connection callBackReader =
+let makeCommand connection response =
     let mutable connection = connection
     let mutable cmdTxt = ""
     { new DbCommand()
@@ -130,13 +134,18 @@ let makeCommand connection callBackReader =
         member this.Cancel () = ()
         member this.CreateDbParameter () = null
         member this.ExecuteDbDataReader commandBehavior =
-            callBackReader commandBehavior
-        member this.ExecuteNonQuery () = 0
+            match response with
+            | Reader callBackReader -> callBackReader commandBehavior
+            | _ -> failwith "ExecuteDbDataReader"
+        member this.ExecuteNonQuery () =
+            match response with
+            | NonQuery response -> response
+            | _ -> failwith "ExecuteNonQuery"
         member this.ExecuteScalar () = null
         member this.Prepare () = ()
     }
 
-let makeConnection cs state openCallback closeCallback makeReader =
+let makeConnectionReader cs state openCallback closeCallback response =
     let mutable connectionString = cs
     { new DbConnection()
         with
@@ -155,5 +164,27 @@ let makeConnection cs state openCallback closeCallback makeReader =
         member this.ChangeDatabase dbName = ()
         member this.Open() = openCallback ()
         member this.BeginDbTransaction isolationLevel = failwith "BeginDbTransaction not called"
-        member this.CreateDbCommand () = makeCommand this makeReader
+        member this.CreateDbCommand () = makeCommand this response
+    }
+
+let makeConnection cs state openCallback closeCallback response =
+    let mutable connectionString = cs
+    { new DbConnection()
+        with
+        member this.ConnectionString
+            with get() = connectionString
+            and set(v) = connectionString <- v
+        member this.Database
+            with get() = ""
+        member this.DataSource
+            with get() = ""
+        member this.ServerVersion
+            with get() = ""
+        member this.State
+            with get() = state
+        member this.Close () = closeCallback ()
+        member this.ChangeDatabase dbName = ()
+        member this.Open() = openCallback ()
+        member this.BeginDbTransaction isolationLevel = failwith "BeginDbTransaction not called"
+        member this.CreateDbCommand () = makeCommand this response
     }
