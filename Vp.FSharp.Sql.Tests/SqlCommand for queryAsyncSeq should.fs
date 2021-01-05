@@ -59,7 +59,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -100,7 +100,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -141,7 +141,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -182,7 +182,7 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let r = SqlCommand.text "select 1"
                 |> SqlCommand.noLogger
@@ -223,7 +223,7 @@ let ``queryAsyncSeq should let the connection when it's other than closed with a
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let r = SqlCommand.text "select 1"
                  |> SqlCommand.noLogger
@@ -274,7 +274,7 @@ let ``queryAsyncSeq should log for all events on globalLogger when the connectio
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
@@ -330,7 +330,7 @@ let ``queryAsyncSeq should log for just command events on globalLogger when the 
                 ]]
     async {
         use connection =
-            Mocks.makeReader data
+            Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Some loggerCallback
                    |> Mocks.makeDependencies None
