@@ -12,7 +12,17 @@ open FSharp.Control
 
 type internal DbConnection with
 
-    member internal this.EnlistCurrentTransaction() = this.EnlistTransaction(Transaction.Current)
+    member this.EnlistCurrentTransaction() = this.EnlistTransaction(Transaction.Current)
+
+type internal DbDataReader with
+    member this.AwaitRead(cancellationToken) = this.ReadAsync(cancellationToken) |> Async.AwaitTask
+    member this.AwaitNextResult(cancellationToken) = this.NextResultAsync(cancellationToken) |> Async.AwaitTask
+    member this.AwaitTryReadNextResult(cancellationToken) =
+        async {
+            let! nextResultOk = this.AwaitNextResult(cancellationToken)
+            if nextResultOk then return! this.AwaitRead(cancellationToken)
+            else return nextResultOk
+        }
 
 
 [<RequireQualifiedAccess>]
@@ -50,20 +60,31 @@ module internal Async =
             return mergedTokenSource.Token
         }
 
+
+[<RequireQualifiedAccess>]
+module internal SkipFirstAsyncSeq =
+
+    let scan folder state source =
+        AsyncSeq.scan folder state source
+        |> AsyncSeq.skip(1)
+
+    let scanAsync folder state source =
+        AsyncSeq.scanAsync folder state source
+        |> AsyncSeq.skip(1)
+
 [<RequireQualifiedAccess>]
 module internal AsyncSeq =
 
     let mapbi mapping source =
         source
-        |> AsyncSeq.scan(fun state item -> (fst state + 1, item)) (-1, def)
-        |> AsyncSeq.skip(1)
+        |> SkipFirstAsyncSeq.scan(fun state item -> (fst state + 1I, item)) (-1I, def)
         |> AsyncSeq.map(fun (bi, item) -> mapping bi item)
 
     let mapChange selector mapping source =
         source
         |> mapbi (fun bi item -> (bi, item))
         |> AsyncSeq.scan(fun (previousSelection, previousMappedItem, _) (bi, item) ->
-            if bi = 0 then
+            if bi = 0I then
                 (selector item, mapping item, item)
             else
                 let currentSelection = selector item
