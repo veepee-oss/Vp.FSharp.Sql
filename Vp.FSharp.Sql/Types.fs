@@ -43,17 +43,20 @@ type CommandDefinition<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 
       Transaction: 'DbTransaction option
       Logger: LoggerKind<'DbConnection, 'DbCommand> }
 
+type SqlGlobalConf<'DbConnection, 'DbCommand
+    when 'DbConnection :> DbConnection
+    and 'DbCommand :> DbCommand> =
+    { DefaultLogger: (SqlLog<'DbConnection, 'DbCommand> -> unit) option }
+
 type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
     when 'DbConnection :> DbConnection
     and 'DbTransaction :> DbTransaction
     and 'DbCommand :> DbCommand
     and 'DbParameter :> DbParameter
-    and 'DbDataReader :> DbDataReader> = {
-        CreateCommand: 'DbConnection -> 'DbCommand
-        ExecuteReaderAsync: 'DbCommand -> Task<'DbDataReader>
-        DbValueToParameter: string -> 'DbType -> 'DbParameter
-        GlobalLogger: (SqlLog<'DbConnection, 'DbCommand> -> unit) option
-    }
+    and 'DbDataReader :> DbDataReader> =
+        { CreateCommand: 'DbConnection -> 'DbCommand
+          ExecuteReaderAsync: 'DbCommand -> CancellationToken -> Task<'DbDataReader>
+          DbValueToParameter: string -> 'DbType -> 'DbParameter }
 
 type DbField =
     { Name: string

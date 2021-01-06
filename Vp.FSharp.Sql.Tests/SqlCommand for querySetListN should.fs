@@ -40,12 +40,14 @@ let ``have querySetList should open and then close the connection if initially c
         use connection =
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+        let deps = Mocks.makeDeps None
+        let globalConf = Mocks.makeGlobalConf None
         let! r0 =
-                SqlCommand.text "select 1"
-                |> SqlCommand.noLogger
-                |> SqlCommand.querySetList connection
-                        (Mocks.makeDependencies None None)
-                        (readValueByIndex columnsIndex 0)
+            SqlCommand.text "select 1"
+            |> SqlCommand.noLogger
+            |> SqlCommand.querySetList connection
+                    deps globalConf
+                    (readValueByIndex columnsIndex 0)
         r0.Length =! 2
         r0 =! ([1..6] |> List.splitInto 2)
         PartialCallCounter.assertEqual callCounter 1 1
@@ -65,12 +67,14 @@ let ``have querySetList2 should open and then close the connection if initially 
         use connection =
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+        let deps = Mocks.makeDeps None
+        let globalConf = Mocks.makeGlobalConf None
         let! (r0, r1) =
-                SqlCommand.text "select 1"
-                |> SqlCommand.noLogger
-                |> SqlCommand.querySetList2 connection (Mocks.makeDependencies None None)
-                        (readValueByIndex columnsIndex 0)
-                        (readValueByIndex columnsIndex 1)
+            SqlCommand.text "select 1"
+            |> SqlCommand.noLogger
+            |> SqlCommand.querySetList2 connection deps globalConf
+                    (readValueByIndex columnsIndex 0)
+                    (readValueByIndex columnsIndex 1)
         r0.Length =! 2
         r0 =! ([1..6] |> List.splitInto 2)
         r1.Length =! 2
@@ -94,10 +98,12 @@ let ``have querySetList3 open and then close the connection if initially closed 
         use connection =
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+        let deps = Mocks.makeDeps None
+        let globalConf = Mocks.makeGlobalConf None
         let! (r0, r1, r2) =
             SqlCommand.text "select 1"
             |> SqlCommand.noLogger
-            |> SqlCommand.querySetList3 connection (Mocks.makeDependencies None None)
+            |> SqlCommand.querySetList3 connection deps globalConf
                     (readValueByIndex columnsIndex 0)
                     (readValueByIndex columnsIndex 1)
                     (readValueByIndex columnsIndex 2)
