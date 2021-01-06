@@ -116,9 +116,28 @@ module Vp.FSharp.Sql.SqlCommand
                     return { state with Continue = false }
         }
 
+    let formatTimeSpan (ts: TimeSpan) : string =
+        sprintf "%id %i:%i:%i:%i"  ts.Days ts.Hours ts.Minutes ts.Seconds ts.Milliseconds
+
     let private log4 deps commandDefinition sqlLog =
         match commandDefinition.Logger with
-        | Global -> deps.GlobalLogger
+        | Global ->
+            deps.GlobalLogger
+            |> Option.orElse
+                (function
+                | ConnectionOpened connection ->
+                    connection.GetHashCode()
+                    |> printf "connection (%i) is opened"
+                | ConnectionClosed (connection, sinceOpened) ->
+                    (connection.GetHashCode(), formatTimeSpan sinceOpened)
+                    |> (fun (a, b) -> printf "connection (%i) was closed (opening duration %s)" a b)
+                | CommandPrepared command ->
+                    (command.GetHashCode(), command.CommandText)
+                    |> (fun (a, b) -> printf "command (%i, %s) is prepared" a b)
+                | CommandExecuted (command, sincePrepared) ->
+                    (command.GetHashCode(), command.CommandText, formatTimeSpan sincePrepared)
+                    |> (fun (a, b, c) -> printf "command (%i, %s) was executed (execution duration %s)" a b c)
+                |> Some)
         | Override logging -> Some logging
         | Nothing -> None
         |> Option.iter (fun f -> f sqlLog)

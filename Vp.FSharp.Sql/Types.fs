@@ -4,7 +4,6 @@ open System
 open System.Data
 open System.Data.Common
 open System.Threading
-open System.Threading.Tasks
 
 open Vp.FSharp.Sql.Helpers
 
@@ -50,7 +49,6 @@ type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataRea
     and 'DbParameter :> DbParameter
     and 'DbDataReader :> DbDataReader> = {
         CreateCommand: 'DbConnection -> 'DbCommand
-        ExecuteReaderAsync: 'DbCommand -> Task<'DbDataReader>
         DbValueToParameter: string -> 'DbType -> 'DbParameter
         GlobalLogger: (SqlLog<'DbConnection, 'DbCommand> -> unit) option
     }

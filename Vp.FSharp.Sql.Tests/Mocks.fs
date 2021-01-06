@@ -7,17 +7,17 @@ open System.Data.Common
 
 open Vp.FSharp.Sql
 
+
 type DbField' =
     { Name: string
       FieldType: Type
       NativeTypeName: string }
 
-type Data = {
-    Columns: DbField' list list
-    GetValues: int32 -> int32 -> Object list
-    CountRows: int32 -> int32
-    CountResultSets: int32
-}
+type Data =
+    { Columns: DbField' list list
+      GetValues: int32 -> int32 -> Object list
+      CountRows: int32 -> int32
+      CountResultSets: int32 }
 
 type Response =
     | Reader of (CommandBehavior -> DbDataReader)
@@ -41,15 +41,12 @@ let fakeData values columns =
             | resultSetIndex when resultSetIndex >= 0 && resultSetIndex < List.length values
                 -> List.length values.[resultSetIndex]
             | _ -> sprintf "count rows: out of resultSetIndex %i" resultSetIndex |> failwith
-      CountResultSets = List.length values
-    }
+      CountResultSets = List.length values }
 
-let makeDependencies (valToParam: (string -> 'a -> 'b) option) logger = {
-    CreateCommand = (fun connection -> connection.CreateCommand())
-    ExecuteReaderAsync = (fun cmd -> cmd.ExecuteReaderAsync())
-    DbValueToParameter = valToParam |> Option.defaultValue (fun _ _ -> failwith "")
-    GlobalLogger = logger
-}
+let makeDependencies (valToParam: (string -> 'a -> 'b) option) logger =
+    { CreateCommand = (fun connection -> connection.CreateCommand())
+      DbValueToParameter = valToParam |> Option.defaultValue (fun _ _ -> failwith "")
+      GlobalLogger = logger }
 
 let makeReader data _ =
     let mutable currentRowIndex = -1
