@@ -43,11 +43,13 @@ let fakeData values columns =
             | _ -> sprintf "count rows: out of resultSetIndex %i" resultSetIndex |> failwith
       CountResultSets = List.length values }
 
-let makeDependencies (valToParam: (string -> 'a -> 'b) option) logger =
+let makeDeps (valToParam: (string -> 'DbType -> 'DbParameter) option)  =
     { CreateCommand = (fun connection -> connection.CreateCommand())
-      ExecuteReaderAsync = (fun cmd -> cmd.ExecuteReaderAsync())
-      DbValueToParameter = valToParam |> Option.defaultValue (fun _ _ -> failwith "")
-      GlobalLogger = logger }
+      ExecuteReaderAsync = (fun cmd -> cmd.ExecuteReaderAsync)
+      DbValueToParameter = valToParam |> Option.defaultValue (fun _ _ -> failwith "") }
+
+let makeGlobalConf logger =
+    { DefaultLogger = logger }
 
 let makeReader data _ =
     let mutable currentRowIndex = -1
@@ -62,35 +64,35 @@ let makeReader data _ =
         member this.IsClosed with get() = true
         member this.RecordsAffected with get() = 0
         member this.Item
-            with get(ordinal: int):Object = null
+            with get(ordinal: int32):Object = null
         member this.Item
             with get(name: string):Object = null
-        member this.GetDataTypeName (ordinal: int) =
+        member this.GetDataTypeName (ordinal: int32) =
             data.Columns.[currentResultSetIndex].[ordinal].NativeTypeName
         member this.GetEnumerator () = null
-        member this.GetFieldType (ordinal: int) =
+        member this.GetFieldType (ordinal: int32) =
             data.Columns.[currentResultSetIndex].[ordinal].FieldType
-        member this.GetName (ordinal: int) =
+        member this.GetName (ordinal: int32) =
             data.Columns.[currentResultSetIndex].[ordinal].Name
         member this.GetOrdinal (name: string) = 0
-        member this.GetBoolean (ordinal: int) = true
-        member this.GetByte (ordinal: int) = 0uy
+        member this.GetBoolean (ordinal: int32) = true
+        member this.GetByte (ordinal: int32) = 0uy
         member this.GetBytes (ordinal, dataOffset, buffer, bufferOffset, length) = 0L
-        member this.GetChar (ordinal: int) = 'a'
+        member this.GetChar (ordinal: int32) = 'a'
         member this.GetChars (ordinal, dataOffset, buffer, bufferOffset, length) = 0L
-        member this.GetDateTime (ordinal: int) = DateTime.Today
-        member this.GetDecimal (ordinal: int) = 0M
-        member this.GetDouble (ordinal: int) = 0.0
-        member this.GetFloat (ordinal: int) = 0F
-        member this.GetGuid (ordinal: int) = Guid.Empty
-        member this.GetInt16 (ordinal: int) = 0s
-        member this.GetInt32 (ordinal: int) = 0
-        member this.GetInt64 (ordinal: int) = 0L
-        member this.GetString (ordinal: int) = ""
-        member this.GetValue (ordinal: int) =
+        member this.GetDateTime (ordinal: int32) = DateTime.Today
+        member this.GetDecimal (ordinal: int32) = 0M
+        member this.GetDouble (ordinal: int32) = 0.0
+        member this.GetFloat (ordinal: int32) = 0F
+        member this.GetGuid (ordinal: int32) = Guid.Empty
+        member this.GetInt16 (ordinal: int32) = 0s
+        member this.GetInt32 (ordinal: int32) = 0
+        member this.GetInt64 (ordinal: int32) = 0L
+        member this.GetString (ordinal: int32) = ""
+        member this.GetValue (ordinal: int32) =
             (data.GetValues currentResultSetIndex currentRowIndex).[ordinal]
         member this.GetValues values = 0
-        member this.IsDBNull (ordinal: int) =
+        member this.IsDBNull (ordinal: int32) =
             (data.GetValues currentResultSetIndex currentRowIndex).[ordinal] = null
         member this.NextResult () =
             currentResultSetIndex <- currentResultSetIndex + 1
