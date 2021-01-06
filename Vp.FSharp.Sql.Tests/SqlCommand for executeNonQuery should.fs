@@ -45,9 +45,7 @@ let ``leave the connection open if initially open`` () =
 [<Fact>]
 let ``log for all events on globalLogger if connection initially closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     async {
         use connection =
             Mocks.NonQuery 2
@@ -65,9 +63,7 @@ let ``log for all events on globalLogger if connection initially closed`` () =
 [<Fact>]
 let ``log just command events on globalLogger if connection initially not closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     async {
         use connection =
             Mocks.NonQuery 3
