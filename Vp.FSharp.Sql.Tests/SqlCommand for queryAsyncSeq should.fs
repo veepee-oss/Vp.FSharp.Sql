@@ -229,9 +229,7 @@ let ``leave the connection open if initially not closed with access valueOrNone 
 [<Fact>]
 let ``log all events on globalLogger if connection initially closed with access valueOrNone by ordinal`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -270,9 +268,7 @@ let ``log all events on globalLogger if connection initially closed with access 
 [<Fact>]
 let ``log for just command events on globalLogger if connection initially not closed with access valueOrNone by ordinal`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]

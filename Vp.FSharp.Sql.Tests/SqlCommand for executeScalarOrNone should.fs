@@ -72,9 +72,7 @@ let ``leave the connection open if initially not closed`` () =
 [<Fact>]
 let ``log for all events on globalLogger if connection initially closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [16]
@@ -102,9 +100,7 @@ let ``log for all events on globalLogger if connection initially closed`` () =
 [<Fact>]
 let ``log for just command events on globalLogger if connection initially not closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [17]
@@ -183,9 +179,7 @@ let ``leave connection open if initially not closed and retrieve None`` () =
 [<Fact>]
 let ``log for all events on globalLogger if connection initially closed and retrieve None`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [null]
@@ -210,9 +204,7 @@ let ``log for all events on globalLogger if connection initially closed and retr
 [<Fact>]
 let ``log for just command events on globalLogger if connection initially not closed and retrieve None`` () =
     let callCounter = FullCallCounter.initSame 0
-    let openCallback = FullCallCounter.createOpenCallback callCounter
-    let closeCallback = FullCallCounter.createCloseCallback callCounter
-    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
+    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [null]
