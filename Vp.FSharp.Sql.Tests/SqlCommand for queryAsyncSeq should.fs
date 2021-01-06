@@ -3,11 +3,15 @@ module Vp.FSharp.Sql.Tests.``SqlCommand for queryAsyncSeq should``
 open System
 open System.Data
 open System.Data.Common
+
 open FSharp.Control
+
 open Swensen.Unquote
+
 open Xunit
 
 open Vp.FSharp.Sql
+open Vp.FSharp.Sql.Tests.Helpers
 
 
 let toFieldName =
@@ -18,26 +22,24 @@ let toFieldNames =
 
 let readValueByFieldName (columns: string list) _ _ (reader: SqlRecordReader<DbDataReader>) =
     columns
-    |> List.map (fun fieldName -> (fieldName, reader.Value fieldName |> int))
+    |> List.map (fun fieldName -> (fieldName, reader.Value fieldName |> int32))
 
 let readValueByIndex (columns: int32 list) _ _ (reader: SqlRecordReader<DbDataReader>) =
     columns
-    |> List.map (reader.Value >> int)
+    |> List.map (reader.Value >> int32)
 
 let readValueOrNoneByFieldName (columns: string list) _ _ (reader: SqlRecordReader<DbDataReader>) =
     columns
-    |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int))
+    |> List.map (fun fieldName -> (fieldName, reader.ValueOrNone fieldName |> Option.map int32))
 
 let readValueOrNoneByIndex (columns: int32 list) _ _ (reader: SqlRecordReader<DbDataReader>) =
     columns
-    |> List.map (reader.ValueOrNone >> Option.map int)
+    |> List.map (reader.ValueOrNone >> Option.map int32)
 
 [<Fact>]
-let ``queryAsyncSeq should open and close the connection when it's closed and access value by columnName`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
+let ``open and then close the connection if initially closed and access value by columnName`` () =
+    let callCounter = PartialCallCounter.initSame 0
+    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;2;3]
@@ -45,16 +47,16 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 ]]
                 [[
                     { Name = "id0"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id1"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id2"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                 ]]
     async {
@@ -69,16 +71,13 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 |> List.sortBy (fun values -> snd values.[0])
         r.Length =! 2
         r =! [[("id2", 3);("id1", 2);("id0", 1)];[("id2", 6);("id1", 5);("id0", 4)]]
-        !openCall =! 1
-        !closeCall =! 1
+        PartialCallCounter.assertEqual callCounter 1 1
     }
 
 [<Fact>]
-let ``queryAsyncSeq should open and close the connection when it's closed and access value by ordinal`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
+let ``open and then close the connection if initially closed and access value by ordinal`` () =
+    let callCounter = PartialCallCounter.initSame 0
+    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;2;3]
@@ -86,16 +85,16 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 ]]
                 [[
                     { Name = "id0"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id1"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id2"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                 ]]
     async {
@@ -110,16 +109,13 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
         r =! [[3;2;1];[6;5;4]]
-        !openCall =! 1
-        !closeCall =! 1
+        PartialCallCounter.assertEqual callCounter 1 1
     }
 
 [<Fact>]
-let ``queryAsyncSeq should open and close the connection when it's closed and access valueOrNone by columnName`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
+let ``open and then close the connection if initially closed and access valueOrNone by columnName`` () =
+    let callCounter = PartialCallCounter.initSame 0
+    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -151,16 +147,13 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 |> List.sortBy (fun values -> snd values.[0])
         r.Length =! 2
         r =! [[("id2", Some 3);("id1", None);("id0", Some 1)];[("id2", Some 6);("id1", Some 5);("id0", Some 4)]]
-        !openCall =! 1
-        !closeCall =! 1
+        PartialCallCounter.assertEqual callCounter 1 1
     }
 
 [<Fact>]
-let ``queryAsyncSeq should open and close the connection when it's closed and access valueOrNone by ordinal`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
+let ``open and then close connection if initially closed and access valueOrNone by ordinal`` () =
+    let callCounter = PartialCallCounter.initSame 0
+    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -168,16 +161,16 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 ]]
                 [[
                     { Name = "id0"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id1"
-                      FieldType = typeof<int Nullable>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32 Nullable>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id2"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                 ]]
     async {
@@ -192,16 +185,13 @@ let ``queryAsyncSeq should open and close the connection when it's closed and ac
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
         r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        !openCall =! 1
-        !closeCall =! 1
+        PartialCallCounter.assertEqual callCounter 1 1
     }
 
 [<Fact>]
-let ``queryAsyncSeq should let the connection when it's other than closed with access valueOrNone by ordinal`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
+let ``leave the connection open if initially not closed with access valueOrNone by ordinal`` () =
+    let callCounter = PartialCallCounter.initSame 0
+    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -209,16 +199,16 @@ let ``queryAsyncSeq should let the connection when it's other than closed with a
                 ]]
                 [[
                     { Name = "id0"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id1"
-                      FieldType = typeof<int Nullable>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32 Nullable>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id2"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                 ]]
     async {
@@ -233,26 +223,15 @@ let ``queryAsyncSeq should let the connection when it's other than closed with a
                  |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
         r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        !openCall =! 0
-        !closeCall =! 0
+        PartialCallCounter.assertEqual callCounter 0 0
     }
 
 [<Fact>]
-let ``queryAsyncSeq should log for all events on globalLogger when the connection is closed with access valueOrNone by ordinal`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
-    let connectionOpened = ref 0
-    let connectionClosed = ref 0
-    let commandPrepared = ref 0
-    let commandExecuted = ref 0
-    let loggerCallback =
-        function
-        | ConnectionOpened _ -> incr connectionOpened
-        | ConnectionClosed _ -> incr connectionClosed
-        | CommandPrepared _ -> incr commandPrepared
-        | CommandExecuted _ -> incr commandExecuted
+let ``log all events on globalLogger if connection initially closed with access valueOrNone by ordinal`` () =
+    let callCounter = FullCallCounter.initSame 0
+    let openCallback = FullCallCounter.createOpenCallback callCounter
+    let closeCallback = FullCallCounter.createCloseCallback callCounter
+    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -260,16 +239,16 @@ let ``queryAsyncSeq should log for all events on globalLogger when the connectio
                 ]]
                 [[
                     { Name = "id0"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id1"
-                      FieldType = typeof<int Nullable>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32 Nullable>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id2"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                 ]]
     async {
@@ -285,30 +264,15 @@ let ``queryAsyncSeq should log for all events on globalLogger when the connectio
                  |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
         r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        !openCall =! 1
-        !closeCall =! 1
-        !connectionOpened =! 1
-        !connectionClosed =! 1
-        !commandPrepared =! 1
-        !commandExecuted =! 1
+        FullCallCounter.assertEqual callCounter 1 1 1 1 1 1
     }
 
 [<Fact>]
-let ``queryAsyncSeq should log for just command events on globalLogger when the connection is NOT closed with access valueOrNone by ordinal`` () =
-    let openCall = ref 0
-    let closeCall = ref 0
-    let openCallback () = incr openCall
-    let closeCallback () = incr closeCall
-    let connectionOpened = ref 0
-    let connectionClosed = ref 0
-    let commandPrepared = ref 0
-    let commandExecuted = ref 0
-    let loggerCallback =
-        function
-        | ConnectionOpened _ -> incr connectionOpened
-        | ConnectionClosed _ -> incr connectionClosed
-        | CommandPrepared _ -> incr commandPrepared
-        | CommandExecuted _ -> incr commandExecuted
+let ``log for just command events on globalLogger if connection initially not closed with access valueOrNone by ordinal`` () =
+    let callCounter = FullCallCounter.initSame 0
+    let openCallback = FullCallCounter.createOpenCallback callCounter
+    let closeCallback = FullCallCounter.createCloseCallback callCounter
+    let loggerCallback = FullCallCounter.createLoggerCallback callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -316,16 +280,16 @@ let ``queryAsyncSeq should log for just command events on globalLogger when the 
                 ]]
                 [[
                     { Name = "id0"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id1"
-                      FieldType = typeof<int Nullable>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32 Nullable>
+                      NativeTypeName = typeof<int32>.Name
                     }
                     { Name = "id2"
-                      FieldType = typeof<int>
-                      NativeTypeName = typeof<int>.Name
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
                     }
                 ]]
     async {
@@ -341,10 +305,5 @@ let ``queryAsyncSeq should log for just command events on globalLogger when the 
                 |> List.sortBy (fun values -> values.[0])
         r.Length =! 2
         r =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        !openCall =! 0
-        !closeCall =! 0
-        !connectionOpened =! 0
-        !connectionClosed =! 0
-        !commandPrepared =! 1
-        !commandExecuted =! 1
+        FullCallCounter.assertEqual callCounter 0 0 0 0 1 1
     }
