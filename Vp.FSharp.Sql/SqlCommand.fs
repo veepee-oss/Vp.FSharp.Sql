@@ -97,31 +97,34 @@ module Vp.FSharp.Sql.SqlCommand
         connection.OpenAsync(cancellationToken)
         |> Async.AwaitTask
 
-    type private ReadState = { Continue: bool; SetIndex: int32; RecordIndex: int32 }
-
-    let private readNextResultRecord state (dataReader: #DbDataReader) cancellationToken =
-        async {
-            let! nextRecordOk = dataReader.ReadAsync(cancellationToken) |> Async.AwaitTask
-            if nextRecordOk then
-                return { state with RecordIndex = state.RecordIndex + 1 }
-            else
-                let! nextResultSetOk = dataReader.NextResultAsync(cancellationToken) |> Async.AwaitTask
-                if nextResultSetOk then
-                    let! firstNextResultSetRecordOk = dataReader.ReadAsync(cancellationToken) |> Async.AwaitTask
-                    if firstNextResultSetRecordOk then
-                        return { state with SetIndex = state.SetIndex + 1; RecordIndex = 0 }
-                    else
-                        return { state with Continue = false }
-                else
-                    return { state with Continue = false }
-        }
-
     let private log4 deps commandDefinition sqlLog =
         match commandDefinition.Logger with
         | Global -> deps.GlobalLogger
         | Override logging -> Some logging
         | Nothing -> None
         |> Option.iter (fun f -> f sqlLog)
+
+    type private ReadState = { Continue: bool; SetIndex: int32; RecordIndex: int32 }
+
+    [<RequireQualifiedAccess>]
+    module private ReadState =
+        let nextRecord state = { state with RecordIndex = state.RecordIndex + 1 }
+        let nextSet state = { state with SetIndex = state.SetIndex + 1; RecordIndex = 0 }
+        let stop state = { state with Continue = false }
+
+    let private tryReadNextResultRecord state (dataReader: #DbDataReader) cancellationToken =
+        async {
+            let! nextResultReadOk = dataReader.AwaitTryReadNextResult(cancellationToken)
+            if nextResultReadOk then return ReadState.nextSet state
+            else return ReadState.stop state
+        }
+
+    let private readNextRecord state (dataReader: #DbDataReader) cancellationToken =
+        async {
+            let! readOk = dataReader.AwaitRead(cancellationToken)
+            if readOk then return ReadState.nextRecord state
+            else return! tryReadNextResultRecord state dataReader cancellationToken
+        }
 
     /// Return the sets of rows as an AsyncSeq accordingly to the command definition.
     let queryAsyncSeq (connection: #DbConnection) deps read commandDefinition =
@@ -144,11 +147,10 @@ module Vp.FSharp.Sql.SqlCommand
                 use! dbDataReader = command.ExecuteReaderAsync(linkedToken) |> Async.AwaitTask
                 let items =
                     AsyncSeq.initInfinite(fun _ -> (dbDataReader, linkedToken))
-                    |> AsyncSeq.scanAsync(
+                    |> SkipFirstAsyncSeq.scanAsync(
                         fun state (dataReader, cancellationToken) ->
-                            readNextResultRecord state dataReader cancellationToken )
+                            readNextRecord state dataReader cancellationToken )
                             { Continue = true; SetIndex = 0; RecordIndex = -1 }
-                    |> AsyncSeq.skip(1)
                     |> AsyncSeq.takeWhile(fun state -> state.Continue)
                     |> AsyncSeq.mapChange(fun state -> state.SetIndex) (fun _ -> SqlRecordReader(dbDataReader))
                     |> AsyncSeq.mapAsync(fun (state, rowReader) -> async {
