@@ -19,11 +19,11 @@ let ``open and then close the connection if initially closed`` () =
             Mocks.NonQuery 0
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf None
+        let conf = Mocks.makeConf None
         let! outcome =
             SqlCommand.text "update"
             |> SqlCommand.noLogger
-            |> SqlCommand.executeNonQuery connection deps globalConf
+            |> SqlCommand.executeNonQuery connection deps conf
         outcome =! 0
         PartialCallCounter.assertEqual callCounter 1 1
     }
@@ -37,11 +37,11 @@ let ``leave the connection open if initially open`` () =
             Mocks.NonQuery 1
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf None
+        let conf = Mocks.makeConf None
         let! outcome =
             SqlCommand.text "update"
             |> SqlCommand.noLogger
-            |> SqlCommand.executeNonQuery connection deps globalConf
+            |> SqlCommand.executeNonQuery connection deps conf
         outcome =! 1
         PartialCallCounter.assertEqual callCounter 0 0
     }
@@ -55,10 +55,10 @@ let ``log for all events on globalLogger if connection initially closed`` () =
             Mocks.NonQuery 2
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf (Some loggerCallback)
+        let conf = Mocks.makeConf (Some loggerCallback)
         let! outcome =
             SqlCommand.text "update"
-            |> SqlCommand.executeNonQuery connection deps globalConf
+            |> SqlCommand.executeNonQuery connection deps conf
         outcome =! 2
         FullCallCounter.assertEqual callCounter 1 1 1 1 1 1
     }
@@ -72,10 +72,10 @@ let ``log just command events on globalLogger if connection initially not closed
             Mocks.NonQuery 3
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf (Some loggerCallback)
+        let conf = Mocks.makeConf (Some loggerCallback)
         let! outcome =
             SqlCommand.text "update"
-            |> SqlCommand.executeNonQuery connection deps globalConf
+            |> SqlCommand.executeNonQuery connection deps conf
         outcome =! 3
         FullCallCounter.assertEqual callCounter 0 0 0 0 1 1
     }
