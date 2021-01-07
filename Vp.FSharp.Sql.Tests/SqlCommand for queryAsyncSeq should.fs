@@ -64,11 +64,11 @@ let ``open and then close the connection if initially closed and access value by
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf None
+        let conf = Mocks.makeConf None
         let outcome =
             SqlCommand.text "select 1"
             |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps globalConf
+            |> SqlCommand.queryAsyncSeq connection deps conf
                (readValueByFieldName ([2;1;0] |> toFieldNames))
             |> AsyncSeq.toListSynchronously
             |> List.sortBy (fun values -> snd values.[0])
@@ -105,11 +105,11 @@ let ``open and then close the connection if initially closed and access value by
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf None
+        let conf = Mocks.makeConf None
         let outcome =
             SqlCommand.text "select 1"
             |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps globalConf
+            |> SqlCommand.queryAsyncSeq connection deps conf
                (readValueByIndex [2;1;0])
             |> AsyncSeq.toListSynchronously
             |> List.sortBy (fun values -> values.[0])
@@ -146,11 +146,11 @@ let ``open and then close the connection if initially closed and access valueOrN
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf None
+        let conf = Mocks.makeConf None
         let outcome =
             SqlCommand.text "select 1"
             |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps globalConf
+            |> SqlCommand.queryAsyncSeq connection deps conf
                (readValueOrNoneByFieldName (toFieldNames [2;1;0]))
             |> AsyncSeq.toListSynchronously
             |> List.sortBy (fun values -> snd values.[0])
@@ -187,11 +187,11 @@ let ``open and then close connection if initially closed and access valueOrNone 
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf None
+        let conf = Mocks.makeConf None
         let outcome =
             SqlCommand.text "select 1"
             |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps globalConf
+            |> SqlCommand.queryAsyncSeq connection deps conf
                (readValueOrNoneByIndex [2;1;0])
             |> AsyncSeq.toListSynchronously
             |> List.sortBy (fun values -> values.[0])
@@ -228,11 +228,11 @@ let ``leave the connection open if initially not closed with access valueOrNone 
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf None
+        let conf = Mocks.makeConf None
         let outcome =
             SqlCommand.text "select 1"
             |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps globalConf
+            |> SqlCommand.queryAsyncSeq connection deps conf
                (readValueOrNoneByIndex [2;1;0])
             |> AsyncSeq.toListSynchronously
             |> List.sortBy (fun values -> values.[0])
@@ -269,10 +269,10 @@ let ``log all events on globalLogger if connection initially closed with access 
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf (Some loggerCallback)
+        let conf = Mocks.makeConf (Some loggerCallback)
         let outcome =
             SqlCommand.text "select 1"
-            |> SqlCommand.queryAsyncSeq connection deps globalConf
+            |> SqlCommand.queryAsyncSeq connection deps conf
                (readValueOrNoneByIndex [2;1;0])
             |> AsyncSeq.toListSynchronously
             |> List.sortBy (fun values -> values.[0])
@@ -309,10 +309,10 @@ let ``log for just command events on globalLogger if connection initially not cl
             Mocks.Reader (Mocks.makeReader data)
             |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
         let deps = Mocks.makeDeps None
-        let globalConf = Mocks.makeGlobalConf (Some loggerCallback)
+        let conf = Mocks.makeConf (Some loggerCallback)
         let outcome =
             SqlCommand.text "select 1"
-            |> SqlCommand.queryAsyncSeq connection deps globalConf
+            |> SqlCommand.queryAsyncSeq connection deps conf
                (readValueOrNoneByIndex [2;1;0])
             |> AsyncSeq.toListSynchronously
             |> List.sortBy (fun values -> values.[0])
