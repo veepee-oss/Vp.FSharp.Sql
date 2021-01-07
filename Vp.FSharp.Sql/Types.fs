@@ -58,13 +58,13 @@ module SqlConf =
 [<AbstractClass; Sealed>]
 type SqlGlobalConf<'DbConnection, 'DbCommand
         when 'DbConnection :> DbConnection
-        and 'DbCommand :> DbCommand> =
+        and 'DbCommand :> DbCommand> private() =
 
-    static member private innerInstance: SqlConf<'DbConnection, 'DbCommand> = SqlConf.defaultValue()
-    static member Instance with get () = SqlGlobalConf<'DbConnection, 'DbCommand>.innerInstance
+    static let mutable instance: SqlConf<'DbConnection, 'DbCommand> = SqlConf.defaultValue()
+    static member Snapshot with get () = instance
 
-    static member logger(value) = SqlConf.logger value SqlGlobalConf<'DbConnection, 'DbCommand>.innerInstance
-    static member noLogger() = SqlConf.noLogger SqlGlobalConf<'DbConnection, 'DbCommand>.innerInstance
+    static member Logger(value) = instance <- SqlConf.logger value instance
+    static member NoLogger() = instance <- SqlConf.noLogger instance
 
 type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
     when 'DbConnection :> DbConnection
