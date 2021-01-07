@@ -25,56 +25,47 @@ let private newTransactionScope isolationLevel timeout scopeOption =
     transactionOptions.IsolationLevel <- isolationLevel
     new TransactionScope(scopeOption, transactionOptions, TransactionScopeAsyncFlowOption.Enabled)
 
-let private execute isolationLevel timeout scopeOption
-    (connection: #DbConnection) body =
-    async {
-        use transactionScope = newTransactionScope isolationLevel timeout scopeOption
-        connection.EnlistCurrentTransaction()
-        let! applyOutcome = body connection
-        return (transactionScope, applyOutcome)
-    }
+let private startScope isolationLevel timeout scopeOption
+    (connection: #DbConnection) =
+    let transactionScope = newTransactionScope isolationLevel timeout scopeOption
+    connection.EnlistCurrentTransaction()
+    transactionScope
 
-let private execute2 isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
-    async {
-        use transactionScope = newTransactionScope isolationLevel timeout scopeOption
-        connection1.EnlistCurrentTransaction()
-        connection2.EnlistCurrentTransaction()
-        let! applyOutcome = body connection1 connection2
-        return (transactionScope, applyOutcome)
-    }
+let private startScope2 isolationLevel timeout scopeOption
+    (connection1: #DbConnection) (connection2: #DbConnection) =
+    let transactionScope = newTransactionScope isolationLevel timeout scopeOption
+    connection1.EnlistCurrentTransaction()
+    connection2.EnlistCurrentTransaction()
+    transactionScope
 
-let private execute3 isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
-    async {
-        use transactionScope = newTransactionScope isolationLevel timeout scopeOption
-        connection1.EnlistCurrentTransaction()
-        connection2.EnlistCurrentTransaction()
-        connection3.EnlistCurrentTransaction()
-        let! applyOutcome = body connection1 connection2 connection3
-        return (transactionScope, applyOutcome)
-    }
+let private startScope3 isolationLevel timeout scopeOption
+    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) =
+    let transactionScope = newTransactionScope isolationLevel timeout scopeOption
+    connection1.EnlistCurrentTransaction()
+    connection2.EnlistCurrentTransaction()
+    connection3.EnlistCurrentTransaction()
+    transactionScope
 
 let complete isolationLevel timeout scopeOption (connection: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute isolationLevel timeout scopeOption connection body
+        use transactionScope = startScope isolationLevel timeout scopeOption connection
+        let! applyOutcome = body connection
         transactionScope.Complete()
         return applyOutcome
     }
 let complete2 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute2 isolationLevel timeout scopeOption connection1 connection2 body
+        use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        let! applyOutcome = body connection1 connection2
         transactionScope.Complete()
         return applyOutcome
     }
 let complete3 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute3 isolationLevel timeout scopeOption connection1 connection2 connection3 body
+        use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        let! applyOutcome = body connection1 connection2 connection3
         transactionScope.Complete()
         return applyOutcome
     }
@@ -82,30 +73,30 @@ let complete3 isolationLevel timeout scopeOption
 let notComplete isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     async {
-        let! (_, applyOutcome) =
-            execute isolationLevel timeout scopeOption connection body
+        use _ = startScope isolationLevel timeout scopeOption connection
+        let! applyOutcome = body connection
         return! applyOutcome
     }
 let notComplete2 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
-        let! (_, applyOutcome) =
-            execute2 isolationLevel timeout scopeOption connection1 connection2 body
+        use _ = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        let! applyOutcome = body connection1 connection2
         return! applyOutcome
     }
 let notComplete3 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
-        let! (_, applyOutcome) =
-            execute3 isolationLevel timeout scopeOption connection1 connection2 connection3 body
+        use _ = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        let! applyOutcome = body connection1 connection2 connection3
         return! applyOutcome
     }
 
 let completeOnSome isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute isolationLevel timeout scopeOption connection body
+        use transactionScope = startScope isolationLevel timeout scopeOption connection
+        let! applyOutcome = body connection
         match applyOutcome with
         | Some some ->
             transactionScope.Complete()
@@ -116,8 +107,8 @@ let completeOnSome isolationLevel timeout scopeOption
 let completeOnSome2 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute2 isolationLevel timeout scopeOption connection1 connection2 body
+        use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        let! applyOutcome = body connection1 connection2
         match applyOutcome with
         | Some some ->
             transactionScope.Complete()
@@ -128,8 +119,8 @@ let completeOnSome2 isolationLevel timeout scopeOption
 let completeOnSome3 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute3 isolationLevel timeout scopeOption connection1 connection2 connection3 body
+        use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        let! applyOutcome = body connection1 connection2 connection3
         match applyOutcome with
         | Some some ->
             transactionScope.Complete()
@@ -141,8 +132,8 @@ let completeOnSome3 isolationLevel timeout scopeOption
 let completeOnOk isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute isolationLevel timeout scopeOption connection body
+        use transactionScope = startScope isolationLevel timeout scopeOption connection
+        let! applyOutcome = body connection
         match applyOutcome with
         | Ok ok ->
             transactionScope.Complete()
@@ -153,8 +144,8 @@ let completeOnOk isolationLevel timeout scopeOption
 let completeOnOk2 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute2 isolationLevel timeout scopeOption connection1 connection2 body
+        use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        let! applyOutcome = body connection1 connection2
         match applyOutcome with
         | Ok ok ->
             transactionScope.Complete()
@@ -165,8 +156,8 @@ let completeOnOk2 isolationLevel timeout scopeOption
 let completeOnOk3 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
-        let! (transactionScope, applyOutcome) =
-            execute3 isolationLevel timeout scopeOption connection1 connection2 connection3 body
+        use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        let! applyOutcome = body connection1 connection2 connection3
         match applyOutcome with
         | Ok ok ->
             transactionScope.Complete()
