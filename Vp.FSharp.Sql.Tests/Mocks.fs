@@ -48,7 +48,7 @@ let makeDeps (valToParam: (string -> 'DbType -> 'DbParameter) option)  =
       ExecuteReaderAsync = (fun cmd -> cmd.ExecuteReaderAsync)
       DbValueToParameter = valToParam |> Option.defaultValue (fun _ _ -> failwith "") }
 
-let makeGlobalConf logger =
+let makeConf logger =
     { DefaultLogger = logger }
 
 let makeReader data _ =

@@ -29,7 +29,7 @@ module Vp.FSharp.Sql.SqlCommand
           CommandType = DefaultCommandType
           Prepare = DefaultPrepare
           Transaction = None
-          Logger = Global }
+          Logger = Conf }
 
     /// Initialize a command definition with the given text contained in the given string.
     let text value = { defaultCommandDefinition() with Text = Text.Single value }
@@ -97,9 +97,9 @@ module Vp.FSharp.Sql.SqlCommand
         connection.OpenAsync(cancellationToken)
         |> Async.AwaitTask
 
-    let private log4 globalConf commandDefinition sqlLog =
+    let private log4 conf commandDefinition sqlLog =
         match commandDefinition.Logger with
-        | Global -> globalConf.DefaultLogger
+        | Conf -> conf.DefaultLogger
         | Override logging -> Some logging
         | Nothing -> None
         |> Option.iter (fun f -> f sqlLog)
@@ -127,11 +127,11 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Return the sets of rows as an AsyncSeq accordingly to the command definition.
-    let queryAsyncSeq (connection: #DbConnection) deps globalConf read commandDefinition =
+    let queryAsyncSeq (connection: #DbConnection) deps conf read commandDefinition =
         asyncSeq {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log4 globalConf commandDefinition sqlLog
+            let log sqlLog = log4 conf commandDefinition sqlLog
             let connectionStopwatch = Stopwatch()
             let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
@@ -168,23 +168,23 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Return the sets of rows as a list accordingly to the command definition.
-    let queryList connection deps globalConf read commandDefinition =
-        queryAsyncSeq connection deps globalConf read commandDefinition
+    let queryList connection deps conf read commandDefinition =
+        queryAsyncSeq connection deps conf read commandDefinition
         |> AsyncSeq.toListAsync
 
     /// Return the first set of rows as a list accordingly to the command definition.
-    let querySetList (connection: #DbConnection) deps globalConf read commandDefinition =
+    let querySetList (connection: #DbConnection) deps conf read commandDefinition =
         async {
             let setList = ResizeArray()
             let readRecord setIndex recordIndex recordReader =
                 if setIndex = 0 then setList.Add(read recordIndex recordReader)
                 else ()
-            do! queryAsyncSeq connection deps globalConf readRecord commandDefinition |> AsyncSeq.consume
+            do! queryAsyncSeq connection deps conf readRecord commandDefinition |> AsyncSeq.consume
             return setList |> Seq.toList
         }
 
     /// Return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
-    let querySetList2 connection deps globalConf read1 read2 commandDefinition =
+    let querySetList2 connection deps conf read1 read2 commandDefinition =
         async {
             let set1List = ResizeArray()
             let set2List = ResizeArray()
@@ -192,12 +192,12 @@ module Vp.FSharp.Sql.SqlCommand
                 if   setIndex = 0 then set1List.Add(read1 recordIndex recordReader)
                 elif setIndex = 1 then set2List.Add(read2 recordIndex recordReader)
                 else ()
-            do! queryAsyncSeq connection deps globalConf readRecord commandDefinition |> AsyncSeq.consume
+            do! queryAsyncSeq connection deps conf readRecord commandDefinition |> AsyncSeq.consume
             return (set1List |> Seq.toList, set2List |> Seq.toList)
         }
 
     /// Return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
-    let querySetList3 connection deps globalConf read1 read2 read3 commandDefinition =
+    let querySetList3 connection deps conf read1 read2 read3 commandDefinition =
         async {
             let set1List = ResizeArray()
             let set2List = ResizeArray()
@@ -207,18 +207,18 @@ module Vp.FSharp.Sql.SqlCommand
                 elif setIndex = 1 then set2List.Add(read2 recordIndex recordReader)
                 elif setIndex = 2 then set3List.Add(read3 recordIndex recordReader)
                 else ()
-            do! queryAsyncSeq connection deps globalConf readRecord commandDefinition |> AsyncSeq.consume
+            do! queryAsyncSeq connection deps conf readRecord commandDefinition |> AsyncSeq.consume
             return (set1List |> Seq.toList, set2List |> Seq.toList, set3List |> Seq.toList)
         }
 
     /// Execute the command accordingly to its definition and,
     /// - return the first cell value, if it is available and of the given type.
     /// - throw an exception, otherwise.
-    let executeScalar<'Scalar, .. > (connection: #DbConnection) deps globalConf commandDefinition =
+    let executeScalar<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log4 globalConf commandDefinition sqlLog
+            let log sqlLog = log4 conf commandDefinition sqlLog
             let connectionStopwatch = Stopwatch()
             let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
@@ -254,12 +254,11 @@ module Vp.FSharp.Sql.SqlCommand
     /// - return Some, if the first cell is available and of the given type.
     /// - return None, if first cell is DbNull.
     /// - throw an exception, otherwise.
-    let executeScalarOrNone<'Scalar, .. > (connection: #DbConnection) deps globalConf commandDefinition =
+    let executeScalarOrNone<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         async {
-
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log4 globalConf commandDefinition sqlLog
+            let log sqlLog = log4 conf commandDefinition sqlLog
             let connectionStopwatch = Stopwatch()
             let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
@@ -289,11 +288,11 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Execute the command accordingly to its definition and, return the number of rows affected.
-    let executeNonQuery (connection: #DbConnection) deps globalConf commandDefinition =
+    let executeNonQuery (connection: #DbConnection) deps conf commandDefinition =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
-            let log sqlLog = log4 globalConf commandDefinition sqlLog
+            let log sqlLog = log4 conf commandDefinition sqlLog
             let connectionStopwatch = Stopwatch()
             let commandStopwatch = Stopwatch()
             use! command = setupCommand deps commandDefinition linkedToken connection
