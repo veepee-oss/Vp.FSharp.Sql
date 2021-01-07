@@ -60,12 +60,11 @@ type SqlGlobalConf<'DbConnection, 'DbCommand
         when 'DbConnection :> DbConnection
         and 'DbCommand :> DbCommand> =
 
-    static member private instance: SqlConf<'DbConnection, 'DbCommand> =
-        SqlConf.defaultValue()
+    static member private innerInstance: SqlConf<'DbConnection, 'DbCommand> = SqlConf.defaultValue()
+    static member Instance with get () = SqlGlobalConf<'DbConnection, 'DbCommand>.innerInstance
 
-    static member logger(value) = SqlConf.logger value SqlGlobalConf<'DbConnection, 'DbCommand>.instance
-    static member noLogger() = SqlConf.noLogger SqlGlobalConf<'DbConnection, 'DbCommand>.instance
-    static member Logger with get () = SqlGlobalConf<'DbConnection, 'DbCommand>.instance.DefaultLogger
+    static member logger(value) = SqlConf.logger value SqlGlobalConf<'DbConnection, 'DbCommand>.innerInstance
+    static member noLogger() = SqlConf.noLogger SqlGlobalConf<'DbConnection, 'DbCommand>.innerInstance
 
 type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
     when 'DbConnection :> DbConnection
