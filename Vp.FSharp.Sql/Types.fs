@@ -24,7 +24,7 @@ type SqlLog<'DbConnection, 'DbCommand
 type LoggerKind<'DbConnection, 'DbCommand
     when 'DbConnection :> DbConnection
     and 'DbCommand :> DbCommand> =
-    | Global
+    | Conf
     | Override of (SqlLog<'DbConnection, 'DbCommand> -> unit)
     | Nothing
 
@@ -43,10 +43,29 @@ type CommandDefinition<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 
       Transaction: 'DbTransaction option
       Logger: LoggerKind<'DbConnection, 'DbCommand> }
 
-type SqlGlobalConf<'DbConnection, 'DbCommand
-    when 'DbConnection :> DbConnection
-    and 'DbCommand :> DbCommand> =
+type SqlConf<'DbConnection, 'DbCommand
+        when 'DbConnection :> DbConnection
+        and 'DbCommand :> DbCommand> =
     { DefaultLogger: (SqlLog<'DbConnection, 'DbCommand> -> unit) option }
+
+[<RequireQualifiedAccess>]
+module SqlConf =
+    let internal defaultValue() = { DefaultLogger = None }
+
+    let logger value conf = { conf with DefaultLogger = Some value }
+    let noLogger conf = { conf with DefaultLogger = None }
+
+[<AbstractClass; Sealed>]
+type SqlGlobalConf<'DbConnection, 'DbCommand
+        when 'DbConnection :> DbConnection
+        and 'DbCommand :> DbCommand> =
+
+    static member private instance: SqlConf<'DbConnection, 'DbCommand> =
+        SqlConf.defaultValue()
+
+    static member logger(value) = SqlConf.logger value SqlGlobalConf<'DbConnection, 'DbCommand>.instance
+    static member noLogger() = SqlConf.noLogger SqlGlobalConf<'DbConnection, 'DbCommand>.instance
+    static member Logger with get () = SqlGlobalConf<'DbConnection, 'DbCommand>.instance.DefaultLogger
 
 type SqlDeps<'DbConnection, 'DbTransaction, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbType
     when 'DbConnection :> DbConnection
