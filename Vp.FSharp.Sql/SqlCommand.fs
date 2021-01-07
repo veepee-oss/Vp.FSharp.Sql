@@ -256,7 +256,6 @@ module Vp.FSharp.Sql.SqlCommand
     /// - throw an exception, otherwise.
     let executeScalarOrNone<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         async {
-
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
             let log sqlLog = log4 conf commandDefinition sqlLog
