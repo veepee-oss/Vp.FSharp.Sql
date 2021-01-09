@@ -105,6 +105,7 @@ type SqlConfigurationCache<'DbConnection, 'DbCommand
     static member Logger(value) = instance <- SqlConfiguration.logger value instance
     static member NoLogger() = instance <- SqlConfiguration.noLogger instance
 
+
 // Ie. The ADO.NET Provider generic constraints mapper due to the lack of proper support for some variant of the SRTP
 // and the hideous members shadowing occuring in most ADO.NET Providers implementation
 type SqlDependencies<'DbConnection, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbTransaction, 'DbType
