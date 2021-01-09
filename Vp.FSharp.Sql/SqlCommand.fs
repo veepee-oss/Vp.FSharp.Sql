@@ -29,21 +29,24 @@ module Vp.FSharp.Sql.SqlCommand
           CommandType = DefaultCommandType
           Prepare = DefaultPrepare
           Transaction = None
-          Logger = Conf }
+          Logger = LoggerKind.Configuration }
 
     /// Initialize a command definition with the given text contained in the given string.
     let text value = { defaultCommandDefinition() with Text = Text.Single value }
 
     /// Initialize a command definition with the given text spanning over several strings (ie. list).
-    let textFromList value = { defaultCommandDefinition() with Text = Text.Multiple value }
+    let textFromList value =
+        { defaultCommandDefinition() with Text = Text.Multiple value }
 
     /// Update the command definition so that when executing the command, it doesn't use any logger.
     /// Be it the default one (Global, if any.) or a previously overriden one.
-    let noLogger commandDefinition = { commandDefinition with Logger = LoggerKind.Nothing }
+    let noLogger commandDefinition =
+        { commandDefinition with Logger = Nothing }
 
     /// Update the command definition so that when executing the command, it use the given overriding logger.
     /// instead of the default one, aka the Global logger, if any.
-    let overrideLogger value commandDefinition = { commandDefinition with Logger = LoggerKind.Override value }
+    let overrideLogger value commandDefinition =
+        { commandDefinition with Logger = LoggerKind.Override value }
 
     /// Update the command definition with the given parameters.
     let parameters value commandDefinition = { commandDefinition with Parameters = value }
@@ -97,9 +100,9 @@ module Vp.FSharp.Sql.SqlCommand
         connection.OpenAsync(cancellationToken)
         |> Async.AwaitTask
 
-    let private log4 conf commandDefinition sqlLog =
+    let private log4 configuration commandDefinition sqlLog =
         match commandDefinition.Logger with
-        | Conf -> conf.DefaultLogger
+        | Configuration -> configuration.DefaultLogger
         | Override logging -> Some logging
         | Nothing -> None
         |> Option.iter (fun f -> f sqlLog)

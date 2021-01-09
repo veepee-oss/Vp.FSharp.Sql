@@ -1,20 +1,21 @@
 ﻿module internal Vp.FSharp.Sql.Helpers
 
 open System
-open System.Data.Common
 open System.Threading
-open System.Text.RegularExpressions
-open System.Threading.Tasks
+open System.Data.Common
 open System.Transactions
+open System.Threading.Tasks
+open System.Text.RegularExpressions
 
 open FSharp.Control
 
 
-type internal DbConnection with
+type DbConnection with
 
     member this.EnlistCurrentTransaction() = this.EnlistTransaction(Transaction.Current)
 
-type internal DbDataReader with
+type DbDataReader with
+
     member this.AwaitRead(cancellationToken) = this.ReadAsync(cancellationToken) |> Async.AwaitTask
     member this.AwaitNextResult(cancellationToken) = this.NextResultAsync(cancellationToken) |> Async.AwaitTask
     member this.AwaitTryReadNextResult(cancellationToken) =
@@ -26,7 +27,7 @@ type internal DbDataReader with
 
 
 [<RequireQualifiedAccess>]
-module internal String =
+module String =
 
     [<Literal>]
     let ConnectionStringSeparator = ";"
@@ -43,16 +44,16 @@ module internal String =
 
     let stitch strs = String.concat SqlNewLineConstant strs
 
-let internal def<'T> = Unchecked.defaultof<'T>
+let def<'T> = Unchecked.defaultof<'T>
 
 [<AbstractClass; Sealed>]
-type internal Async private () =
+type Async private () =
     static member AwaitValueTask(valueTask: ValueTask) = valueTask.AsTask() |> Async.AwaitTask
     static member AwaitValueTask(valueTask: ValueTask<'T>) = valueTask.AsTask() |> Async.AwaitTask
 
 
 [<RequireQualifiedAccess>]
-module internal Async =
+module Async =
     let linkedTokenSourceFrom cancellationToken =
         async {
             let! token = Async.CancellationToken
@@ -62,7 +63,7 @@ module internal Async =
 
 
 [<RequireQualifiedAccess>]
-module internal SkipFirstAsyncSeq =
+module SkipFirstAsyncSeq =
 
     let scan folder state source =
         AsyncSeq.scan folder state source
@@ -73,7 +74,7 @@ module internal SkipFirstAsyncSeq =
         |> AsyncSeq.skip(1)
 
 [<RequireQualifiedAccess>]
-module internal AsyncSeq =
+module AsyncSeq =
 
     let mapbi mapping source =
         source
@@ -97,7 +98,7 @@ module internal AsyncSeq =
 
     let consume source = AsyncSeq.iter(fun _ -> ()) source
 
-module internal DbNull =
+module DbNull =
     let is<'T>() = typedefof<'T> = typedefof<DBNull>
 
     let retypedAs<'T>() = DBNull.Value :> obj :?> 'T

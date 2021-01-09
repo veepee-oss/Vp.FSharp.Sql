@@ -24,6 +24,32 @@ TBD    | [![Semantic Release](https://img.shields.io/badge/Semantic%20Release-17
 ---------------- | -------- | ------- |
  `Vp.FSharp.Sql` | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql) | `Install-Package Vp.FSharp.Sql`
 
+# Why did you folks create this lib?
+
+##  Motivations
+
+- We all agree that Dapper is a great library
+- We also wanted something even more bare-bone and more functional / idiomatic-F#
+- Inspired by [Zaid's Npgsql.FSharp](https://github.com/Zaid-Ajaj/Npgsql.FSharp) but with
+    - Multi DB-providers support
+    - Explicit operations flow
+    - Transaction Helpers
+    - Dapper connection workflow
+    - (Very) limited support for basic events (ie. logging)
+    - Opinionated (ie. async only, not result as return types)
+
+# How to use this library?
+
+This library mostly aims at being used some sort of building block with ADO.NET providers to provide a strongly-typed, 
+you can check out the libraries below, each leveraging a specific ADO.NET provider:
+- [Vp.FSharp.Sql.PostgreSql](https://github.com/veepee-oss/Vp.FSharp.Sql.PostgreSql)
+- [Vp.FSharp.Sql.SqlServer](https://github.com/veepee-oss/Vp.FSharp.Sql.SqlServer)
+- [Vp.FSharp.Sql.Sqlite](https://github.com/veepee-oss/Vp.FSharp.Sql.Sqlite)
+
+In a Nutshell you can create your own provider by:
+- Using the relevant generic providers `SqlDeps` (this is used due to the lack of member support for the SRTP)
+- 
+
 # How to Contribute
 Bug reports, feature requests, and pull requests are very welcome! Please read the [Contribution Guidelines](./CONTRIBUTION.md) to get started.
 
