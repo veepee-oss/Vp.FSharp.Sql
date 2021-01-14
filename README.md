@@ -42,12 +42,16 @@ TBD    | [![Semantic Release](https://img.shields.io/badge/Semantic%20Release-17
 
 This library mostly aims at being used some sort of building block with ADO.NET providers to provide a strongly-typed, 
 you can check out the libraries below, each leveraging a specific ADO.NET provider:
-- [Vp.FSharp.Sql.PostgreSql](https://github.com/veepee-oss/Vp.FSharp.Sql.PostgreSql)
-- [Vp.FSharp.Sql.SqlServer](https://github.com/veepee-oss/Vp.FSharp.Sql.SqlServer)
-- [Vp.FSharp.Sql.Sqlite](https://github.com/veepee-oss/Vp.FSharp.Sql.Sqlite)
+
+Name                                          | Version  | Command |
+--------------------------------------------- | -------- | ------- |
+[`Vp.FSharp.Sql.Sqlite`][sqlite-repo]         | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.Sqlite.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite) | `Install-Package Vp.FSharp.Sql.Sqlite`
+[`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]   | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer) | `Install-Package Vp.FSharp.Sql.SqlServer`
+[`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite) | `Install-Package Vp.FSharp.Sql.PostgreSql`
 
 In a Nutshell you can create your own provider by:
-- Using the relevant generic providers `SqlDeps` (this is used due to the lack of member support for the SRTP)
+- Using the relevant generic providers `SqlDependencies` (this is used due to the lack of member support for the SRTP)
+- Using the relevant generic providers `SqlDependencies` (this is used due to the lack of member support for the SRTP)
 - 
 
 # How to Contribute
@@ -55,3 +59,7 @@ Bug reports, feature requests, and pull requests are very welcome! Please read t
 
 # Licensing
 The project is licensed under MIT. For more information on the license see the [license file](./LICENSE).
+
+[sqlite-repo]: https://github.com/veepee-oss/Vp.FSharp.Sql.Sqlite
+[sqlserver-repo]: https://github.com/veepee-oss/Vp.FSharp.Sql.SqlServer
+[postgresql-repo]: https://github.com/veepee-oss/Vp.FSharp.Sql.PostgreSql

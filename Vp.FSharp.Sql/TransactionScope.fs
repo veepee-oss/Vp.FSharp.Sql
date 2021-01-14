@@ -75,21 +75,22 @@ let notComplete isolationLevel timeout scopeOption
     async {
         use _ = startScope isolationLevel timeout scopeOption connection
         let! applyOutcome = body connection
-        return! applyOutcome
+        return applyOutcome
     }
 let notComplete2 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
         use _ = startScope2 isolationLevel timeout scopeOption connection1 connection2
         let! applyOutcome = body connection1 connection2
-        return! applyOutcome
+        return applyOutcome
     }
 let notComplete3 isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
+    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection)
+    body =
     async {
         use _ = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
         let! applyOutcome = body connection1 connection2 connection3
-        return! applyOutcome
+        return applyOutcome
     }
 
 let completeOnSome isolationLevel timeout scopeOption
