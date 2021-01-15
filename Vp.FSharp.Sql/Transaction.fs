@@ -13,37 +13,37 @@ let DefaultIsolationLevel = IsolationLevel.ReadCommitted
 
 let commit cancellationToken isolationLevel (connection: #DbConnection) body =
     async {
-        let wasClosed = connection.State = ConnectionState.Closed
+        let wasClosed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
         try
-            if wasClosed then do! connection.OpenAsync(linkedToken) |> Async.AwaitTask
+            if wasClosed then do! DbConnection.openIfClosed linkedToken wasClosed connection
             use! transaction = connection.BeginTransactionAsync(isolationLevel, linkedToken) |> Async.AwaitValueTask
             let! actionResult = body connection
             do! transaction.CommitAsync(linkedToken) |> Async.AwaitTask
             return actionResult
         finally
-            if wasClosed then connection.Close()
+            DbConnection.closedIfClosed wasClosed connection
     }
 
 let notCommit cancellationToken isolationLevel (connection: #DbConnection) body =
     async {
-        let wasClosed = connection.State = ConnectionState.Closed
+        let wasClosed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
         try
-            if wasClosed then do! connection.OpenAsync(linkedToken) |> Async.AwaitTask
+            if wasClosed then do! DbConnection.openIfClosed linkedToken wasClosed connection
             use! _transaction = connection.BeginTransactionAsync(isolationLevel, linkedToken) |> Async.AwaitValueTask
             let! actionResult = body connection
             return actionResult
         finally
-            if wasClosed then connection.Close()
+            DbConnection.closedIfClosed wasClosed connection
     }
 
 let commitOnSome cancellationToken isolationLevel (connection: #DbConnection) body =
     async {
-        let wasClosed = connection.State = ConnectionState.Closed
+        let wasClosed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
         try
-            if wasClosed then do! connection.OpenAsync(linkedToken) |> Async.AwaitTask
+            if wasClosed then do! DbConnection.openIfClosed linkedToken wasClosed connection
             use! transaction = connection.BeginTransactionAsync(isolationLevel, linkedToken) |> Async.AwaitValueTask
             match! body connection with
             | Some some ->
@@ -52,15 +52,15 @@ let commitOnSome cancellationToken isolationLevel (connection: #DbConnection) bo
             | None ->
                 return None
         finally
-            if wasClosed then connection.Close()
+            DbConnection.closedIfClosed wasClosed connection
     }
 
 let commitOnOk cancellationToken isolationLevel (connection: #DbConnection) body =
     async {
-        let wasClosed = connection.State = ConnectionState.Closed
+        let wasClosed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
         try
-            if wasClosed then do! connection.OpenAsync(linkedToken) |> Async.AwaitTask
+            if wasClosed then do! DbConnection.openIfClosed linkedToken wasClosed connection
             use! transaction = connection.BeginTransactionAsync(isolationLevel, linkedToken) |> Async.AwaitValueTask
             match! body connection with
             | Ok ok ->
@@ -69,11 +69,11 @@ let commitOnOk cancellationToken isolationLevel (connection: #DbConnection) body
             | Error error ->
                 return Error error
         finally
-            if wasClosed then connection.Close()
+            DbConnection.closedIfClosed wasClosed connection
     }
 
 let defaultCommit connection body =
-    commit  CancellationToken.None DefaultIsolationLevel connection body
+    commit CancellationToken.None DefaultIsolationLevel connection body
 
 let defaultNotCommit connection body =
     notCommit CancellationToken.None DefaultIsolationLevel connection body

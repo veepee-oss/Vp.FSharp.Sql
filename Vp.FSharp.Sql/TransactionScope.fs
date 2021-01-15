@@ -3,6 +3,7 @@ module Vp.FSharp.Sql.TransactionScope
 
 open System
 open System.Data.Common
+open System.Threading
 open System.Transactions
 
 open Vp.FSharp.Sql.Helpers
@@ -28,46 +29,79 @@ let private newTransactionScope isolationLevel timeout scopeOption =
 let private startScope isolationLevel timeout scopeOption
     (connection: #DbConnection) =
     let transactionScope = newTransactionScope isolationLevel timeout scopeOption
-    connection.EnlistCurrentTransaction()
+    DbConnection.enlistCurrentTransaction connection
     transactionScope
 
 let private startScope2 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) =
     let transactionScope = newTransactionScope isolationLevel timeout scopeOption
-    connection1.EnlistCurrentTransaction()
-    connection2.EnlistCurrentTransaction()
+    DbConnection.enlistCurrentTransaction connection1
+    DbConnection.enlistCurrentTransaction connection2
     transactionScope
 
 let private startScope3 isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) =
     let transactionScope = newTransactionScope isolationLevel timeout scopeOption
-    connection1.EnlistCurrentTransaction()
-    connection2.EnlistCurrentTransaction()
-    connection3.EnlistCurrentTransaction()
+    DbConnection.enlistCurrentTransaction connection1
+    DbConnection.enlistCurrentTransaction connection2
+    DbConnection.enlistCurrentTransaction connection3
     transactionScope
 
-let complete isolationLevel timeout scopeOption (connection: #DbConnection) body =
+let complete cancellationToken isolationLevel timeout scopeOption (connection: #DbConnection) body =
     async {
-        use transactionScope = startScope isolationLevel timeout scopeOption connection
-        let! applyOutcome = body connection
-        transactionScope.Complete()
-        return applyOutcome
+        let closed = DbConnection.isClosed connection
+        let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+        try
+            do! DbConnection.openIfClosed linkedToken closed connection
+
+            use transactionScope = startScope isolationLevel timeout scopeOption connection
+            let! applyOutcome = body connection
+            transactionScope.Complete()
+            return applyOutcome
+
+        finally
+            DbConnection.closedIfClosed closed connection
     }
-let complete2 isolationLevel timeout scopeOption
+let complete2 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
-        use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
-        let! applyOutcome = body connection1 connection2
-        transactionScope.Complete()
-        return applyOutcome
+        let closed1 = DbConnection.isClosed connection1
+        let closed2 = DbConnection.isClosed connection2
+        let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+        try
+            do! DbConnection.openIfClosed linkedToken closed1 connection1
+            do! DbConnection.openIfClosed linkedToken closed2 connection2
+
+            use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+            let! applyOutcome = body connection1 connection2
+
+            transactionScope.Complete()
+
+            return applyOutcome
+        finally
+            DbConnection.closedIfClosed closed1 connection1
+            DbConnection.closedIfClosed closed2 connection2
     }
-let complete3 isolationLevel timeout scopeOption
+let complete3 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
-        use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
-        let! applyOutcome = body connection1 connection2 connection3
-        transactionScope.Complete()
-        return applyOutcome
+        let closed1 = DbConnection.isClosed connection1
+        let closed2 = DbConnection.isClosed connection2
+        let closed3 = DbConnection.isClosed connection3
+        let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+        try
+            do! DbConnection.openIfClosed linkedToken closed1 connection1
+            do! DbConnection.openIfClosed linkedToken closed2 connection2
+            do! DbConnection.openIfClosed linkedToken closed3 connection3
+
+            use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+            let! applyOutcome = body connection1 connection2 connection3
+            transactionScope.Complete()
+            return applyOutcome
+        finally
+            DbConnection.closedIfClosed closed1 connection1
+            DbConnection.closedIfClosed closed2 connection2
+            DbConnection.closedIfClosed closed3 connection3
     }
 
 let notComplete isolationLevel timeout scopeOption
@@ -169,13 +203,13 @@ let completeOnOk3 isolationLevel timeout scopeOption
 
 let defaultComplete body =
     body
-    |> complete DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    |> complete CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 let defaultComplete2 body =
     body
-    |> complete2 DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    |> complete2 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 let defaultComplete3 body =
     body
-    |> complete3 DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    |> complete3 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 let defaultNotComplete body =
     body
