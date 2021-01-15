@@ -1,6 +1,7 @@
 ﻿module internal Vp.FSharp.Sql.Helpers
 
 open System
+open System.Data
 open System.Threading
 open System.Data.Common
 open System.Transactions
@@ -10,9 +11,20 @@ open System.Text.RegularExpressions
 open FSharp.Control
 
 
-type DbConnection with
+[<RequireQualifiedAccess>]
+module DbConnection  =
 
-    member this.EnlistCurrentTransaction() = this.EnlistTransaction(Transaction.Current)
+    let enlistCurrentTransaction (connection: #DbConnection) =
+        connection.EnlistTransaction(Transaction.Current)
+
+    let isClosed (connection: #DbConnection) =
+        connection.State = ConnectionState.Closed
+
+    let openIfClosed cancellationToken closed (connection: #DbConnection) =
+        async { if closed then do! connection.OpenAsync(cancellationToken) |> Async.AwaitTask }
+
+    let closedIfClosed closed (connection: #DbConnection) =
+        if closed then connection.Close()
 
 type DbDataReader with
 
