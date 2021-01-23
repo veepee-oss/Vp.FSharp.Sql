@@ -5,6 +5,7 @@ open System
 open System.Data
 open System.Data.Common
 
+open System.Threading.Tasks
 open Vp.FSharp.Sql
 
 
@@ -45,6 +46,8 @@ let fakeData values columns =
 
 let makeDeps (valToParam: (string -> 'DbType -> 'DbParameter) option)  =
     { CreateCommand = (fun connection -> connection.CreateCommand())
+      SetCommandTransaction = (fun command transaction -> command.Transaction <- transaction)
+      BeginTransactionAsync = (fun _ _ _ -> ValueTask.FromResult null)
       ExecuteReaderAsync = (fun cmd -> cmd.ExecuteReaderAsync)
       DbValueToParameter = valToParam |> Option.defaultValue (fun _ _ -> failwith "") }
 
