@@ -85,14 +85,22 @@ let commitOnOk cancellationToken isolationLevel
             DbConnection.closedIfClosed wasClosed connection
     }
 
-let defaultCommit connection body =
+let defaultCommit connection
+    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    body =
     commit CancellationToken.None DefaultIsolationLevel connection body
 
-let defaultNotCommit connection body =
+let defaultNotCommit connection
+    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    body =
     notCommit CancellationToken.None DefaultIsolationLevel connection body
 
-let defaultCommitOnSome connection body =
+let defaultCommitOnSome connection
+    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    body =
     commitOnSome CancellationToken.None DefaultIsolationLevel connection body
 
-let defaultCommitOnOk connection body =
+let defaultCommitOnOk connection
+    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    body =
     commitOnOk CancellationToken.None DefaultIsolationLevel connection body
