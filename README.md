@@ -36,7 +36,7 @@ TBD    | [![Semantic Release](https://img.shields.io/badge/Semantic%20Release-17
     - Transaction Helpers
     - Dapper connection workflow
     - (Very) limited support for basic events (ie. logging)
-    - Opinionated (ie. async only, not result as return types)
+    - Opinionated (ie. async only, no result as return types)
 
 # How to use this library?
 
@@ -50,9 +50,10 @@ Name                                          | Version  | Command |
 [`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite) | `Install-Package Vp.FSharp.Sql.PostgreSql`
 
 In a Nutshell you can create your own provider by:
-- Using the relevant generic providers `SqlDependencies` (this is used due to the lack of member support for the SRTP)
-- Using the relevant generic providers `SqlDependencies` (this is used due to the lack of member support for the SRTP)
-- 
+- Using the relevant generic providers `SqlDependencies` 
+  (this is used due to the lack of member support for the SRTP, 
+  especially regarding shadowing members which is quite common across all ADO.NET providers)
+- To be continued...
 
 # How to Contribute
 Bug reports, feature requests, and pull requests are very welcome! Please read the [Contribution Guidelines](./CONTRIBUTION.md) to get started.
