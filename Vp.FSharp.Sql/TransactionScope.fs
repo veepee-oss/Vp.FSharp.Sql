@@ -2,8 +2,8 @@
 module Vp.FSharp.Sql.TransactionScope
 
 open System
-open System.Data.Common
 open System.Threading
+open System.Data.Common
 open System.Transactions
 
 open Vp.FSharp.Sql.Helpers
