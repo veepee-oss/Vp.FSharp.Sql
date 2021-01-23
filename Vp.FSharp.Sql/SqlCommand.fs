@@ -75,7 +75,7 @@ module Vp.FSharp.Sql.SqlCommand
             let command = deps.CreateCommand connection
 
             Option.iter
-                (fun transaction -> command.Transaction <- transaction)
+                (deps.SetCommandTransaction command)
                 (commandDefinition.Transaction)
 
             match commandDefinition.Text with
