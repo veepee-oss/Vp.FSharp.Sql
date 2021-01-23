@@ -115,6 +115,8 @@ type SqlDependencies<'DbConnection, 'DbCommand, 'DbParameter, 'DbDataReader, 'Db
     and 'DbDataReader :> DbDataReader
     and 'DbTransaction :> DbTransaction> =
         { CreateCommand: 'DbConnection -> 'DbCommand
+          SetCommandTransaction: 'DbCommand -> 'DbTransaction -> unit
+          BeginTransactionAsync: 'DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<'DbTransaction>
           ExecuteReaderAsync: 'DbCommand -> CancellationToken -> Task<'DbDataReader>
           DbValueToParameter: string -> 'DbType -> 'DbParameter }
 
