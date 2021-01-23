@@ -1,9 +1,9 @@
 ﻿[<RequireQualifiedAccess>]
 module Vp.FSharp.Sql.Transaction
 
+open System.Data
 open System.Threading
 open System.Data.Common
-open System.Transactions
 open System.Threading.Tasks
 
 open Vp.FSharp.Sql.Helpers
@@ -14,7 +14,7 @@ let DefaultIsolationLevel = IsolationLevel.ReadCommitted
 
 let commit cancellationToken isolationLevel
     (connection: #DbConnection)
-    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
     (body: #DbConnection -> #DbTransaction -> Async<'Output>)=
     async {
         let wasClosed = DbConnection.isClosed connection
@@ -31,7 +31,7 @@ let commit cancellationToken isolationLevel
 
 let notCommit cancellationToken isolationLevel
     (connection: #DbConnection)
-    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
     (body: #DbConnection -> #DbTransaction -> Async<'Output>) =
     async {
         let wasClosed = DbConnection.isClosed connection
@@ -47,7 +47,7 @@ let notCommit cancellationToken isolationLevel
 
 let commitOnSome cancellationToken isolationLevel
     (connection: #DbConnection)
-    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
     (body: #DbConnection -> #DbTransaction -> Async<'Output option>) =
     async {
         let wasClosed = DbConnection.isClosed connection
@@ -67,7 +67,7 @@ let commitOnSome cancellationToken isolationLevel
 
 let commitOnOk cancellationToken isolationLevel
     (connection: #DbConnection)
-    (beginTransaction: #DbConnection -> 'IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
+    (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
     (body: #DbConnection -> #DbTransaction -> Async<Result<'Ok, 'Error>>) =
     async {
         let wasClosed = DbConnection.isClosed connection
