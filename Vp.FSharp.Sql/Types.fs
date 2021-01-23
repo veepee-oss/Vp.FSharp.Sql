@@ -2,8 +2,8 @@
 
 open System
 open System.Data
-open System.Data.Common
 open System.Threading
+open System.Data.Common
 open System.Threading.Tasks
 
 open Vp.FSharp.Sql.Helpers
@@ -117,7 +117,7 @@ type SqlDependencies<'DbConnection, 'DbCommand, 'DbParameter, 'DbDataReader,
     and 'DbTransaction :> DbTransaction> =
         { CreateCommand: 'DbConnection -> 'DbCommand
           SetCommandTransaction: 'DbCommand -> 'DbTransaction -> unit
-          BeginTransactionAsync: 'DbConnection -> 'DbTransactionIsolationLevel -> CancellationToken -> ValueTask<'DbTransaction>
+          BeginTransactionAsync: 'DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<'DbTransaction>
           ExecuteReaderAsync: 'DbCommand -> CancellationToken -> Task<'DbDataReader>
           DbValueToParameter: string -> 'DbType -> 'DbParameter }
 
