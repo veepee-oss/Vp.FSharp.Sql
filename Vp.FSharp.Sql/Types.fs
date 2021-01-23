@@ -108,8 +108,7 @@ type SqlConfigurationCache<'DbConnection, 'DbCommand
 
 // Ie. The ADO.NET Provider generic constraints mapper due to the lack of proper support for some variant of the SRTP
 // and the hideous members shadowing occuring in most ADO.NET Providers implementation
-type SqlDependencies<'DbConnection, 'DbCommand, 'DbParameter, 'DbDataReader,
-                     'DbTransaction, 'DbTransactionIsolationLevel, 'DbType
+type SqlDependencies<'DbConnection, 'DbCommand, 'DbParameter, 'DbDataReader, 'DbTransaction, 'DbType
     when 'DbConnection :> DbConnection
     and 'DbCommand :> DbCommand
     and 'DbParameter :> DbParameter
