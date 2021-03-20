@@ -352,7 +352,6 @@ let defaultCommitOnOk connection body = Transaction.defaultCommitOnOk connection
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 let defaultCommitOnSome connection body = Transaction.defaultCommitOnSome connection beginTransactionAsync body
-
 ```
 
 And voila! You're now all settled and ready to execute the wildest commands against your favorite database!
