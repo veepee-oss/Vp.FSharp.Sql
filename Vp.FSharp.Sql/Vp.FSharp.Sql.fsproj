@@ -22,7 +22,7 @@
     <Compile Include="TransactionScope.fs" />
     <Compile Include="Transaction.fs" />
     <Compile Include="Types.fs" />
-    <Compile Include="SqlDbValue.fs" />
+    <Compile Include="NullDbValue.fs" />
     <Compile Include="SqlCommand.fs" />
   </ItemGroup>
 

@@ -31,10 +31,10 @@ module Vp.FSharp.Sql.SqlCommand
           Transaction = None
           Logger = LoggerKind.Configuration }
 
-    /// Initialize a command definition with the given text contained in the given string.
+    /// Initialize a new command definition with the given text contained in the given string.
     let text value = { defaultCommandDefinition() with Text = Text.Single value }
 
-    /// Initialize a command definition with the given text spanning over several strings (ie. list).
+    /// Initialize a new command definition with the given text spanning over several strings (ie. list).
     let textFromList value =
         { defaultCommandDefinition() with Text = Text.Multiple value }
 
@@ -129,7 +129,7 @@ module Vp.FSharp.Sql.SqlCommand
             else return! tryReadNextResultRecord state dataReader cancellationToken
         }
 
-    /// Return the sets of rows as an AsyncSeq accordingly to the command definition.
+    /// Execute the command and return the sets of rows as an AsyncSeq accordingly to the command definition.
     let queryAsyncSeq (connection: #DbConnection) deps conf read commandDefinition =
         asyncSeq {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
@@ -170,12 +170,12 @@ module Vp.FSharp.Sql.SqlCommand
                     ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
         }
 
-    /// Return the sets of rows as a list accordingly to the command definition.
+    /// Execute the command and return the sets of rows as a list accordingly to the command definition.
     let queryList connection deps conf read commandDefinition =
         queryAsyncSeq connection deps conf read commandDefinition
         |> AsyncSeq.toListAsync
 
-    /// Return the first set of rows as a list accordingly to the command definition.
+    /// Execute the command and return the first set of rows as a list accordingly to the command definition.
     let querySetList (connection: #DbConnection) deps conf read commandDefinition =
         async {
             let setList = ResizeArray()
