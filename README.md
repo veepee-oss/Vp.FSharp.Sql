@@ -286,7 +286,7 @@ let executeNonQuery connection (commandDefinition: SqliteCommandDefinition) =
         connection (Constants.Deps) (SqliteConfiguration.Snapshot) commandDefinition
 ```
 
-## Null Helpers
+## 🦮 Null Helpers
 
 Again, this is all about passing the relevant parameters to the underlying core.
 
@@ -304,7 +304,7 @@ let ifNone toDbValue = NullDbValue.ifNone toDbValue SqliteDbValue.Null
 let ifError toDbValue = NullDbValue.ifError toDbValue (fun _ -> SqliteDbValue.Null)
 ```
 
-## Transaction Helpers
+## 🚄 Transaction Helpers
 
 Same old, sane old here too
 
@@ -356,6 +356,8 @@ let defaultCommitOnSome connection body = Transaction.defaultCommitOnSome connec
 ```
 
 And voila! You're now all settled and ready to execute the wildest commands against your favorite database!
+
+![Congratulations!](https://media.giphy.com/media/TGcvcOiWBwvbsiTZjg/giphy.gif)
 
 # ❤ How to Contribute
 Bug reports, feature requests, and pull requests are very welcome!
