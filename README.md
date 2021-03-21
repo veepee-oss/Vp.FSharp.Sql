@@ -31,8 +31,9 @@ TBD        | [![Semantic Release](https://img.shields.io/badge/Semantic%20Releas
 
 # 📚 How to use this library?
 
-This library mostly aims at being used as some sort of building blocks with the relevant ADO.NET providers to provide a strongly-typed experience, 
-you can check out the libraries below, each leveraging a specific ADO.NET provider:
+This library mostly aims at being used as some sort of foundation to build other libraries with the relevant ADO.NET providers to provide a strongly-typed experience. 
+
+You can check out the libraries below, each leveraging `Vp.FSharp.Sql` and the relevant ADO.NET provider:
 
 Name                                          | Version  | Command |
 --------------------------------------------- | -------- | ------- |
