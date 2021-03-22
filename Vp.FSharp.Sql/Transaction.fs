@@ -12,6 +12,8 @@ open Vp.FSharp.Sql.Helpers
 [<Literal>]
 let DefaultIsolationLevel = IsolationLevel.ReadCommitted
 
+/// Create and commit an automatically generated transaction with the given connection, isolation,
+/// cancellation token and transaction body.
 let commit cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -29,6 +31,8 @@ let commit cancellationToken isolationLevel
             DbConnection.closedIfClosed wasClosed connection
     }
 
+/// Create and do not commit an automatically generated transaction with the given connection, isolation,
+/// cancellation token and transaction body.
 let notCommit cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -45,6 +49,9 @@ let notCommit cancellationToken isolationLevel
             DbConnection.closedIfClosed wasClosed connection
     }
 
+/// Create and commit an automatically generated transaction with the given connection, isolation,
+/// cancellation token and transaction body.
+/// The commit phase only occurs if the transaction body returns Some.
 let commitOnSome cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -65,6 +72,9 @@ let commitOnSome cancellationToken isolationLevel
             DbConnection.closedIfClosed wasClosed connection
     }
 
+/// Create and commit an automatically generated transaction with the given connection, isolation,
+/// cancellation token and transaction body.
+/// The commit phase only occurs if the transaction body returns Ok.
 let commitOnOk cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -85,14 +95,20 @@ let commitOnOk cancellationToken isolationLevel
             DbConnection.closedIfClosed wasClosed connection
     }
 
+/// Create and commit an automatically generated transaction with the given connection and transaction body.
 let defaultCommit connection beginTransaction body =
     commit CancellationToken.None DefaultIsolationLevel connection beginTransaction body
 
+/// Create and do not commit an automatically generated transaction with the given connection and transaction body.
 let defaultNotCommit connection beginTransaction body =
     notCommit CancellationToken.None DefaultIsolationLevel connection beginTransaction body
 
+/// Create and commit an automatically generated transaction with the given connection and transaction body.
+/// The commit phase only occurs if the transaction body returns Ok.
 let defaultCommitOnSome connection beginTransaction body =
     commitOnSome CancellationToken.None DefaultIsolationLevel connection beginTransaction body
 
+/// Create and commit an automatically generated transaction with the given connection and transaction body.
+/// The commit phase only occurs if the transaction body returns Some.
 let defaultCommitOnOk connection beginTransaction body =
     commitOnOk CancellationToken.None DefaultIsolationLevel connection beginTransaction body
