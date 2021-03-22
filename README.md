@@ -4,7 +4,7 @@ The core library that enables you to work with F# and any ADO provider, _consist
 
 In most cases, this library is only used for creating other F# libraries leveraging the relevant ADO providers.
 
-If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#-how-to-use-this-library?)
+If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#-how-to-use-this-library)
 
 # ✨ Slagging Hype
 
@@ -353,12 +353,13 @@ And voila! You're now all settled and ready to execute the wildest commands agai
 
 # 🌐 `TransactionScope` Helpers
 
-These helpers work regardless of the provider as long as the ADO.NET providers support `TransactionScope`.
+These helpers work regardless of the ADO.NET provider you're using as long as it supports `TransactionScope`.
 
-
-
-
-
+⚠ A few things to consider ⚠
+- 🚨 Bear in mind that [the support for distributed transactions is not yet available](https://github.com/dotnet/runtime/issues/715) since the .NET core era. 
+- 🚨 Using `TransactionScope` (with or without those helpers) is very error-prone and you might bump into unexpected behaviours without benefiting from clear error messages.
+- 🚨 Considering that there is very little evolution regarding this support and therefore there is somehow limited applications to use the `TransactionScope` 
+  without the support for distributed transactions, those helpers might move to a separate library (i.e. repository + nuget package).
 
 # ❤ How to Contribute
 Bug reports, feature requests, and pull requests are very welcome!
