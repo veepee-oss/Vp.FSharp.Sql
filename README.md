@@ -4,7 +4,7 @@ The core library that enables you to work with F# and any ADO provider, _consist
 
 In most cases, this library is only used for creating other F# libraries leveraging the relevant ADO providers.
 
-If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#📚-how-to-use-this-library?)
+If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#-how-to-use-this-library?)
 
 # ✨ Slagging Hype
 
@@ -180,7 +180,7 @@ This type is also yet another binder for types and acts as a cache, it will be p
 ## 🏗️ Command Construction
 
 It's fairly straightforward, all you need to do is:
-- Create a new module.
+- Create a new module (if you want to).
 - Define the construction functions relevant to your library and pass the command definition to the `SqlCommand` core functions.
 
 ```fsharp
@@ -289,7 +289,7 @@ let executeNonQuery connection (commandDefinition: SqliteCommandDefinition) =
 
 ## 🦮 Null Helpers
 
-Again, this is all about passing the relevant parameters to the underlying core.
+Again, we can create another module and the rest is all about passing the relevant parameters to the underlying core functions.
 
 ```fsharp
 [<RequireQualifiedAccess>]
@@ -347,9 +347,11 @@ let defaultCommitOnSome connection body = Transaction.defaultCommitOnSome connec
 let defaultCommitOnOk connection body = Transaction.defaultCommitOnOk connection beginTransactionAsync body
 ```
 
+![Congratulations!](https://media.giphy.com/media/TGcvcOiWBwvbsiTZjg/giphy.gif)
+
 And voila! You're now all settled and ready to execute the wildest commands against your favorite database!
 
-# 🚄 `TransactionScope` Helpers
+# 🌐 `TransactionScope` Helpers
 
 These helpers work regardless of the provider as long as the ADO.NET providers support `TransactionScope`.
 
@@ -357,7 +359,6 @@ These helpers work regardless of the provider as long as the ADO.NET providers s
 
 
 
-![Congratulations!](https://media.giphy.com/media/TGcvcOiWBwvbsiTZjg/giphy.gif)
 
 # ❤ How to Contribute
 Bug reports, feature requests, and pull requests are very welcome!
