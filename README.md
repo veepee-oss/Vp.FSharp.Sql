@@ -310,6 +310,15 @@ let ifError toDbValue = NullDbValue.ifError toDbValue (fun _ -> SqliteDbValue.Nu
 Same old, same old here too.
 
 ```fsharp
+[<RequireQualifiedAccess>]
+module Vp.FSharp.Sql.Sqlite.SqliteTransaction
+
+open Vp.FSharp.Sql
+open Vp.FSharp.Sql.Sqlite
+
+
+let private beginTransactionAsync = Constants.Deps.BeginTransactionAsync
+
 /// Create and commit an automatically generated transaction with the given connection, isolation,
 /// cancellation token and transaction body.
 let commit cancellationToken isolationLevel connection body =
