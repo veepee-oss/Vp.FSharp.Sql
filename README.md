@@ -239,7 +239,7 @@ module Vp.FSharp.Sql.Sqlite.SqliteCommand
 open Vp.FSharp.Sql
 
 
-// [...]
+// [...Command Construction Functions...]
 
 /// Execute the command and return the sets of rows as an AsyncSeq accordingly to the command definition.
 let queryAsyncSeq connection read (commandDefinition: SqliteCommandDefinition) =
