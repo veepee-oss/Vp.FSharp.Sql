@@ -99,9 +99,14 @@ type SqlConfigurationCache<'DbConnection, 'DbCommand
         and 'DbCommand :> DbCommand> private() =
 
     static let mutable instance: SqlConfiguration<'DbConnection, 'DbCommand> = SqlConfiguration.defaultValue()
+
+    /// Get the current state of the configuration cache (i.e. SqlConfiguration is a record, and hence immutable)
     static member Snapshot with get () = instance
 
+    /// Set up the logger callback
     static member Logger(value) = instance <- SqlConfiguration.logger value instance
+
+    /// Set up no logger callback
     static member NoLogger() = instance <- SqlConfiguration.noLogger instance
 
 
@@ -119,7 +124,7 @@ type SqlDependencies<'DbConnection, 'DbCommand, 'DbParameter, 'DbDataReader, 'Db
           ExecuteReaderAsync: 'DbCommand -> CancellationToken -> Task<'DbDataReader>
           DbValueToParameter: string -> 'DbType -> 'DbParameter }
 
-// Represents a field collected by the SqlRecordReader
+/// Represents a field collected by the SqlRecordReader
 type DbField =
     { /// The field name as found in the result set.
       Name: string
@@ -142,8 +147,8 @@ type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReade
           NativeTypeName = dataReader.GetDataTypeName(fieldIndex) }
 
     let cachedFields = [0 .. dataReader.FieldCount - 1] |> List.map mapFieldIndex
-    let cachedFieldsByName = cachedFields |> List.map(fun column -> (column.Name, column)) |> readOnlyDict
-    let cachedFieldsByIndex = cachedFields |> List.map(fun column -> (column.Index, column)) |> readOnlyDict
+    let cachedFieldsByName = cachedFields |> List.map(fun field -> (field.Name, field)) |> readOnlyDict
+    let cachedFieldsByIndex = cachedFields |> List.map(fun field -> (field.Index, field)) |> readOnlyDict
 
     let availableFields =
         cachedFieldsByName
@@ -151,50 +156,65 @@ type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReade
             sprintf "(%d)[%s:%s|%s]" index kvp.Key kvp.Value.NetTypeName kvp.Value.NativeTypeName)
         |> String.concat ", "
 
-    let failToReadColumnByName columnName columnTypeName =
+    let failToReadFieldByName fieldName fieldTypeName =
         failwithf "Could not read field '%s' as %s. Available fields are %s"
-            columnName columnTypeName availableFields
+            fieldName fieldTypeName availableFields
 
-    let failToReadColumnByIndex columnIndex columnTypeName =
+    let failToReadFieldByIndex fieldIndex fieldTypeName =
         failwithf "Could not read field at index %d as %s. Available fields are %s"
-            columnIndex columnTypeName availableFields
+            fieldIndex fieldTypeName availableFields
 
-    member this.ColumnsByName = cachedFieldsByName
-    member this.ColumnsByIndex = cachedFieldsByIndex
-    member this.Count = dataReader.FieldCount
+    /// The current fields accessible by their resp. names
+    member this.FieldsByName = cachedFieldsByName
 
-    member this.Value<'T> (columnName: string) =
-        match cachedFieldsByName.TryGetValue(columnName) with
+    /// The current fields accessible by their resp. indexes
+    member this.FieldsByIndex = cachedFieldsByIndex
+
+    /// The current number of available fields
+    member this.FieldCount = dataReader.FieldCount
+
+    /// Get value of the given field via its name, if any, otherwise throw an exception.
+    member this.Value<'T> (fieldName: string) =
+        match cachedFieldsByName.TryGetValue(fieldName) with
             | true, column ->
                 // https://github.com/npgsql/npgsql/issues/2087
-                if dataReader.IsDBNull(columnName) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
+                if dataReader.IsDBNull(fieldName) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
                 else dataReader.GetFieldValue<'T>(column.Index)
             | false, _ ->
-                failToReadColumnByName columnName typeof<'T>.Name
+                failToReadFieldByName fieldName typeof<'T>.Name
 
-    member this.ValueOrNone<'T> (columnName: string) =
-        match cachedFieldsByName.TryGetValue(columnName) with
+    /// Get value of the given field via its name:
+    /// - return Some, if the value is available and of the given type.
+    /// - return None, if the value is DBNull.
+    /// - throw an exception, otherwise.
+    member this.ValueOrNone<'T> (fieldName: string) =
+        match cachedFieldsByName.TryGetValue(fieldName) with
         | true, column ->
             if dataReader.IsDBNull(column.Index) then None
             else Some (dataReader.GetFieldValue<'T>(column.Index))
         | false, _ ->
-            failToReadColumnByName columnName typeof<'T>.Name
+            failToReadFieldByName fieldName typeof<'T>.Name
 
-    member this.Value<'T> (columnIndex: int32) =
-        match cachedFieldsByIndex.TryGetValue(columnIndex) with
+    /// Get value of the given field via its index, if any, otherwise throw an exception.
+    member this.Value<'T> (fieldIndex: int32) =
+        match cachedFieldsByIndex.TryGetValue(fieldIndex) with
             | true, column ->
                 // https://github.com/npgsql/npgsql/issues/2087
-                if dataReader.IsDBNull(columnIndex) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
+                if dataReader.IsDBNull(fieldIndex) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
                 else dataReader.GetFieldValue<'T>(column.Index)
             | false, _ ->
-                failToReadColumnByIndex columnIndex typeof<'T>.Name
+                failToReadFieldByIndex fieldIndex typeof<'T>.Name
 
+    /// Get value of the given field via its index:
+    /// - return Some, if the value is available and of the given type.
+    /// - return None, if the value is DBNull.
+    /// - throw an exception, otherwise.
     member this.ValueOrNone<'T> (columnIndex: int32) =
         match cachedFieldsByIndex.TryGetValue(columnIndex) with
         | true, column ->
             if dataReader.IsDBNull(column.Index) then None
             else Some (dataReader.GetFieldValue<'T>(column.Index))
         | false, _ ->
-            failToReadColumnByIndex columnIndex typeof<'T>.Name
+            failToReadFieldByIndex columnIndex typeof<'T>.Name
 
 exception SqlNoDataAvailableException

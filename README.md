@@ -177,6 +177,7 @@ type SqliteConfiguration =
 
 This type is also yet another binder for types and acts as a cache, it will be passed along with the command definition when executing a command.
 
+
 ## 🏗️ Command Construction
 
 It's fairly straightforward, all you need to do is:
@@ -229,7 +230,7 @@ let transaction value (commandDefinition: SqliteCommandDefinition) : SqliteComma
 
 ```
 
-## ⚙️ Command Execution
+## ⚙ Command Execution
 
 Likewise, the command execution follows the same principles, aka passing the relevant strongly-typed parameters (corresponding to your current and specific ADO.NET provider) to the SQLCommand core functions.
 
@@ -364,11 +365,14 @@ And voila! You're now all settled and ready to execute the wildest commands agai
 
 These helpers work regardless of the ADO.NET provider you're using as long as it supports `TransactionScope`.
 
-⚠ A few things to consider ⚠
+⚠ That being said, **we strongly discourage you from using those helpers**:
 - 🚨 Bear in mind that [the support for distributed transactions is not yet available](https://github.com/dotnet/runtime/issues/715) since the .NET core era. 
 - 🚨 Using `TransactionScope` (with or without those helpers) is very error-prone and you might bump into unexpected behaviours without benefiting from clear error messages.
-- 🚨 Considering that there is very little evolution regarding this support and therefore there is somehow limited applications to use the `TransactionScope` 
-  without the support for distributed transactions, those helpers might move to a separate library (i.e. repository + nuget package).
+- 🚨 Considering that there is very little evolution regarding the support for distributed transactions and therefore there is somehow limited applications to use the `TransactionScope` 
+  without this very same support for distributed transactions, those helpers might very much move to a separate library (i.e. repository + nuget package).
+
+If you need a viable workaround to 2PC or distributed transactions, you might want to check some architectural patterns such as [the Saga Pattern](https://www.youtube.com/watch?v=xDuwrtwYHu8).
+
 
 # ❤ How to Contribute
 Bug reports, feature requests, and pull requests are very welcome!
