@@ -255,7 +255,7 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Execute the command accordingly to its definition and,
     /// - return Some, if the first cell is available and of the given type.
-    /// - return None, if first cell is DbNull.
+    /// - return None, if first cell is DBNull.
     /// - throw an exception, otherwise.
     let executeScalarOrNone<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         async {

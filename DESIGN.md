@@ -27,8 +27,9 @@
       - `Async<'T>`-only
       - No result as return types: our premise is that we do expect infra (IO) to run as smoothly as possible, 
         if you think that something might fail, it's your duty to implement the relevant resilience policy.\
-- We also really like [Pim's Donald](https://github.com/pimbrouwers/Donald) but with a more strongly-typed approach, because some ADO.NET providers come with their own peculiarities and features and some devs might need whenever it's convenient.
-- There is definitely a lot of room for improvements, it's definitely not a ground-breaking library but some people might find it handy.
+- We also really like [Pim's Donald](https://github.com/pimbrouwers/Donald) but with a more strongly-typed approach, because some ADO.NET providers come with their own peculiarities and features and some devs might need them whenever it's convenient. 
+  We might, though, be tempted by adding the support for CE command definition in the foreseeable future.
+- There is definitely a lot of room for improvements, it's not a ground-breaking library but we have some reasons to think that some people might find it useful.
 
 ## 🙎‍♀️ F# Limitations, Shortcomings, Discrepancies?
 

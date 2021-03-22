@@ -1,10 +1,10 @@
 # `Vp.FSharp.Sql`
 
-The core library that enables to work with F# and any ADO provider, _consistently_.
+The core library that enables you to work with F# and any ADO provider, _consistently_.
 
 In most cases, this library is only used for creating other F# libraries leveraging the relevant ADO providers.
 
-If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#how-to-use-this-library?)
+If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#📚-how-to-use-this-library?)
 
 # ✨ Slagging Hype
 
@@ -28,18 +28,17 @@ TBD        | [![Semantic Release](https://img.shields.io/badge/Semantic%20Releas
 ---------------- | -------- | ------- |
  `Vp.FSharp.Sql` | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql) | `Install-Package Vp.FSharp.Sql`
 
-
 # 📚 How to use this library?
 
 This library mostly aims at being used as some sort of foundation to build other libraries with the relevant ADO.NET providers to provide a strongly-typed experience. 
 
 You can check out the libraries below, each leveraging `Vp.FSharp.Sql` and the relevant ADO.NET provider:
 
-Name                                          | Version  | Command |
---------------------------------------------- | -------- | ------- |
-[`Vp.FSharp.Sql.Sqlite`][sqlite-repo]         | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.Sqlite.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)       | `Install-Package Vp.FSharp.Sql.Sqlite`
-[`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]   | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer) | `Install-Package Vp.FSharp.Sql.SqlServer`
-[`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)   | `Install-Package Vp.FSharp.Sql.PostgreSql`
+Name                                          | ADO.NET Provider                                                                       | Version  | Command |
+--------------------------------------------- | -------------------------------------------------------------------------------------- | -------- | ------- |
+[`Vp.FSharp.Sql.Sqlite`][sqlite-repo]         | [`System.Data.SQLite.Core`](https://www.nuget.org/packages/System.Data.SQLite.Core)    | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.Sqlite.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)       | `Install-Package Vp.FSharp.Sql.Sqlite`
+[`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]   | [`Microsoft.Data.SqlClient`](https://www.nuget.org/packages/Microsoft.Data.SqlClient)  | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer) | `Install-Package Vp.FSharp.Sql.SqlServer`
+[`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [`Npgsql`](https://www.nuget.org/packages/Npgsql)                                      | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)   | `Install-Package Vp.FSharp.Sql.PostgreSql`
 
 In a Nutshell you can create your own complete provider, but you're free to just go with only some particular bits.
 
@@ -216,6 +215,7 @@ let cancellationToken value (commandDefinition: SqliteCommandDefinition) : Sqlit
     SqlCommand.cancellationToken value commandDefinition
 
 /// Update the command definition with the given timeout.
+/// Note: kludged because SQLite doesn't support per-command timeout values.
 let timeout value (commandDefinition: SqliteCommandDefinition) : SqliteCommandDefinition =
     SqlCommand.timeout value commandDefinition
 
@@ -226,6 +226,7 @@ let prepare value (commandDefinition: SqliteCommandDefinition) : SqliteCommandDe
 /// Update the command definition and sets whether the command should be wrapped in the given transaction.
 let transaction value (commandDefinition: SqliteCommandDefinition) : SqliteCommandDefinition =
     SqlCommand.transaction value commandDefinition
+
 ```
 
 ## ⚙️ Command Execution
@@ -274,7 +275,7 @@ let executeScalar<'Scalar> connection (commandDefinition: SqliteCommandDefinitio
 
 /// Execute the command accordingly to its definition and,
 /// - return Some, if the first cell is available and of the given type.
-/// - return None, if first cell is DbNull.
+/// - return None, if first cell is DBNull.
 /// - throw an exception, otherwise.
 let executeScalarOrNone<'Scalar> connection (commandDefinition: SqliteCommandDefinition) =
     SqlCommand.executeScalarOrNone<'Scalar, _, _, _, _, _, _, _, _>
@@ -306,41 +307,32 @@ let ifError toDbValue = NullDbValue.ifError toDbValue (fun _ -> SqliteDbValue.Nu
 
 ## 🚄 Transaction Helpers
 
-Same old, sane old here too
+Same old, same old here too.
 
 ```fsharp
-[<RequireQualifiedAccess>]
-module Vp.FSharp.Sql.Sqlite.SqliteTransaction
-
-open Vp.FSharp.Sql
-open Vp.FSharp.Sql.Sqlite
-
-
-let private beginTransactionAsync = Constants.Deps.BeginTransactionAsync
-
 /// Create and commit an automatically generated transaction with the given connection, isolation,
-/// cancellation token and transaction body. 
+/// cancellation token and transaction body.
 let commit cancellationToken isolationLevel connection body =
     Transaction.commit cancellationToken isolationLevel connection beginTransactionAsync body
 
 /// Create and do not commit an automatically generated transaction with the given connection, isolation,
-/// cancellation token and transaction body. 
+/// cancellation token and transaction body.
 let notCommit cancellationToken isolationLevel connection body =
     Transaction.notCommit cancellationToken isolationLevel connection beginTransactionAsync body
 
 /// Create and commit an automatically generated transaction with the given connection, isolation,
-/// cancellation token and transaction body. 
-/// The commit phase only occurs if the transaction body returns Ok.
-let commitOnOk cancellationToken isolationLevel connection body =
-    Transaction.commitOnOk cancellationToken isolationLevel connection beginTransactionAsync body
-
-/// Create and commit an automatically generated transaction with the given connection, isolation,
-/// cancellation token and transaction body. 
+/// cancellation token and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 let commitOnSome cancellationToken isolationLevel connection body =
     Transaction.commitOnSome cancellationToken isolationLevel connection beginTransactionAsync body
 
-/// Create and commit an automatically generated transaction with the given connection and transaction body. 
+/// Create and commit an automatically generated transaction with the given connection, isolation,
+/// cancellation token and transaction body.
+/// The commit phase only occurs if the transaction body returns Ok.
+let commitOnOk cancellationToken isolationLevel connection body =
+    Transaction.commitOnOk cancellationToken isolationLevel connection beginTransactionAsync body
+
+/// Create and commit an automatically generated transaction with the given connection and transaction body.
 let defaultCommit connection body = Transaction.defaultCommit connection beginTransactionAsync body
 
 /// Create and do not commit an automatically generated transaction with the given connection and transaction body.
@@ -348,14 +340,22 @@ let defaultNotCommit connection body = Transaction.defaultNotCommit connection b
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-let defaultCommitOnOk connection body = Transaction.defaultCommitOnOk connection beginTransactionAsync body
+let defaultCommitOnSome connection body = Transaction.defaultCommitOnSome connection beginTransactionAsync body
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-let defaultCommitOnSome connection body = Transaction.defaultCommitOnSome connection beginTransactionAsync body
+let defaultCommitOnOk connection body = Transaction.defaultCommitOnOk connection beginTransactionAsync body
 ```
 
 And voila! You're now all settled and ready to execute the wildest commands against your favorite database!
+
+# 🚄 `TransactionScope` Helpers
+
+These helpers work regardless of the provider as long as the ADO.NET providers support `TransactionScope`.
+
+
+
+
 
 ![Congratulations!](https://media.giphy.com/media/TGcvcOiWBwvbsiTZjg/giphy.gif)
 

@@ -16,7 +16,6 @@ type Text =
     /// The text is represented as multiple strings.
     | Multiple of string list
 
-
 /// The type representing the different sql logs available.
 type SqlLog<'DbConnection, 'DbCommand
     when 'DbConnection :> DbConnection
