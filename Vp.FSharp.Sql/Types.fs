@@ -120,7 +120,9 @@ type SqlDependencies<'DbConnection, 'DbCommand, 'DbParameter, 'DbDataReader, 'Db
     and 'DbTransaction :> DbTransaction> =
         { CreateCommand: 'DbConnection -> 'DbCommand
           SetCommandTransaction: 'DbCommand -> 'DbTransaction -> unit
+          BeginTransaction: 'DbConnection -> IsolationLevel -> 'DbTransaction
           BeginTransactionAsync: 'DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<'DbTransaction>
+          ExecuteReader: 'DbCommand -> 'DbDataReader
           ExecuteReaderAsync: 'DbCommand -> CancellationToken -> Task<'DbDataReader>
           DbValueToParameter: string -> 'DbType -> 'DbParameter }
 
@@ -216,5 +218,11 @@ type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReade
             else Some (dataReader.GetFieldValue<'T>(column.Index))
         | false, _ ->
             failToReadFieldByIndex columnIndex typeof<'T>.Name
+
+type SetNumber = int32
+type RecordNumber = int32
+
+type Read<'DbDataReader, 'T when 'DbDataReader :> DbDataReader> =
+    SetNumber -> RecordNumber -> SqlRecordReader<'DbDataReader> -> 'T
 
 exception SqlNoDataAvailableException
