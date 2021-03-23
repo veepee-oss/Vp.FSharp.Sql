@@ -48,7 +48,9 @@ let fakeData values columns =
 let makeDeps (valToParam: (string -> 'DbType -> 'DbParameter) option)  =
     { CreateCommand = (fun connection -> connection.CreateCommand())
       SetCommandTransaction = (fun command transaction -> command.Transaction <- transaction)
+      BeginTransaction = (fun _ _ -> null)
       BeginTransactionAsync = (fun _ _ _ -> ValueTask.FromResult null)
+      ExecuteReader = (fun cmd -> cmd.ExecuteReader())
       ExecuteReaderAsync = (fun cmd -> cmd.ExecuteReaderAsync)
       DbValueToParameter = valToParam |> Option.defaultValue (fun _ _ -> failwith "") }
 
