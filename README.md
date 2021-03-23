@@ -4,11 +4,11 @@ The core library that enables you to work with F# and any ADO provider, _consist
 
 In most cases, this library is only used for creating other F# libraries leveraging the relevant ADO providers.
 
-If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#-how-to-use-this-library)
+If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#-how-to-use-this-library).
 
 # ✨ Slagging Hype
 
-We aim at following "highly controversial practices" to the best of our ability!
+We follow "highly controversial practices" to the best of our ability!
 
 Status     | Package                
 ---------- | ----------------------
@@ -30,7 +30,7 @@ TBD        | [![Semantic Release](https://img.shields.io/badge/Semantic%20Releas
 
 # 📚 How to use this library?
 
-This library mostly aims at being used as some sort of foundation to build other libraries with the relevant ADO.NET providers to provide a strongly-typed experience. 
+This library mostly aims to be a foundation for building other libraries with the relevant ADO.NET providers to provide a strongly-typed experience.
 
 You can check out the libraries below, each leveraging `Vp.FSharp.Sql` and the relevant ADO.NET provider:
 
@@ -40,7 +40,7 @@ Name                                          | ADO.NET Provider                
 [`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]   | [`Microsoft.Data.SqlClient`](https://www.nuget.org/packages/Microsoft.Data.SqlClient)  | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer) | `Install-Package Vp.FSharp.Sql.SqlServer`
 [`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [`Npgsql`](https://www.nuget.org/packages/Npgsql)                                      | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)   | `Install-Package Vp.FSharp.Sql.PostgreSql`
 
-In a Nutshell you can create your own complete provider, but you're free to just go with only some particular bits.
+In a nutshell, you can create your own complete provider, but you're free to just go with only the things you need.
 
 Let's walk-through the [`Vp.FSharp.Sql.Sqlite` provider implementation][sqlite-repo].
 
