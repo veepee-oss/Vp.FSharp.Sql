@@ -167,7 +167,8 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Execute the command and return the sets of rows as an AsyncSeq accordingly to the command definition.
     /// Note: This function run asynchronously.
-    let queryAsyncSeq (connection: #DbConnection) deps conf read commandDefinition =
+    let queryAsyncSeq (connection: #DbConnection) deps conf
+        (read: Read<_, _>) commandDefinition =
         asyncSeq {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
             let wasClosed = connection.State = ConnectionState.Closed
@@ -209,7 +210,8 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Execute the command and return the sets of rows as an seq accordingly to the command definition.
     /// Note: This function run synchronously.
-    let querySeqSync (connection: #DbConnection) deps conf read commandDefinition =
+    let querySeqSync (connection: #DbConnection) deps conf
+        (read: Read<_, _>) commandDefinition =
         let wasClosed = connection.State = ConnectionState.Closed
         let log sqlLog = log4 conf commandDefinition sqlLog
         let connectionStopwatch = Stopwatch()
@@ -243,13 +245,22 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Execute the command and return the sets of rows as a list accordingly to the command definition.
     /// Note: This function run asynchronously.
-    let queryList connection deps conf read commandDefinition =
+    let queryList connection deps conf
+        (read: Read<_, _>) commandDefinition =
         queryAsyncSeq connection deps conf read commandDefinition
         |> AsyncSeq.toListAsync
 
+    /// Execute the command and return the sets of rows as a list accordingly to the command definition.
+    /// Note: This function run synchronously.
+    let queryListSync connection deps conf
+        (read: Read<_, _>) commandDefinition =
+        querySeqSync connection deps conf read commandDefinition
+        |> Seq.toList
+
     /// Execute the command and return the first set of rows as a list accordingly to the command definition.
     /// Note: This function run asynchronously.
-    let querySetList (connection: #DbConnection) deps conf read commandDefinition =
+    let querySetList (connection: #DbConnection) deps conf
+        (read: ReadSet<_, _>) commandDefinition =
         async {
             let setList = ResizeArray()
             let readRecord setIndex recordIndex recordReader =
@@ -261,7 +272,8 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Execute the command and return the first set of rows as a list accordingly to the command definition.
     /// Note: This function run synchronously.
-    let querySetListSync (connection: #DbConnection) deps conf read commandDefinition =
+    let querySetListSync (connection: #DbConnection) deps conf
+        (read: ReadSet<_, _>) commandDefinition =
         let setList = ResizeArray()
         let readRecord setIndex recordIndex recordReader =
             if setIndex = 0 then setList.Add(read recordIndex recordReader)
@@ -271,7 +283,8 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
     /// Note: This function run asynchronously.
-    let querySetList2 connection deps conf read1 read2 commandDefinition =
+    let querySetList2 connection deps conf
+        (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) commandDefinition =
         async {
             let set1List = ResizeArray()
             let set2List = ResizeArray()
@@ -285,7 +298,8 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
     /// Note: This function run synchronously.
-    let querySetList2Sync connection deps conf read1 read2 commandDefinition =
+    let querySetList2Sync connection deps conf
+        (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) commandDefinition =
         let set1List = ResizeArray()
         let set2List = ResizeArray()
         let readRecord setIndex recordIndex recordReader =
@@ -297,7 +311,8 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
     /// Note: This function run asynchronously.
-    let querySetList3 connection deps conf read1 read2 read3 commandDefinition =
+    let querySetList3 connection deps conf
+        (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) (read3: ReadSet<_, _>) commandDefinition =
         async {
             let set1List = ResizeArray()
             let set2List = ResizeArray()
@@ -313,7 +328,8 @@ module Vp.FSharp.Sql.SqlCommand
 
     /// Return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
     /// Note: This function run synchronously.
-    let querySetList3Sync connection deps conf read1 read2 read3 commandDefinition =
+    let querySetList3Sync connection deps conf
+        (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) (read3: ReadSet<_, _>) commandDefinition =
         let set1List = ResizeArray()
         let set2List = ResizeArray()
         let set3List = ResizeArray()

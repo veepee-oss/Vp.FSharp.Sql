@@ -225,4 +225,7 @@ type RecordNumber = int32
 type Read<'DbDataReader, 'T when 'DbDataReader :> DbDataReader> =
     SetNumber -> RecordNumber -> SqlRecordReader<'DbDataReader> -> 'T
 
+type ReadSet<'DbDataReader, 'T when 'DbDataReader :> DbDataReader> =
+    RecordNumber -> SqlRecordReader<'DbDataReader> -> 'T
+
 exception SqlNoDataAvailableException
