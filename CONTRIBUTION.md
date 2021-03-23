@@ -90,7 +90,7 @@ Please adhere to the coding conventions in the project (indentation, accurate co
    # Navigate to the newly cloned directory
    cd Vp.FSharp.Sql
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/fsprojects/Vp.FSharp.Sql
+   git remote add upstream https://github.com/veepee-oss/Vp.FSharp.Sql
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream, and update your fork:
