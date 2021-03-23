@@ -23,6 +23,9 @@ module DbConnection  =
     let openIfClosed cancellationToken closed (connection: #DbConnection) =
         async { if closed then do! connection.OpenAsync(cancellationToken) |> Async.AwaitTask }
 
+    let openIfClosedSync closed (connection: #DbConnection) =
+        if closed then connection.Open()
+
     let closedIfClosed closed (connection: #DbConnection) =
         if closed then connection.Close()
 
