@@ -14,7 +14,7 @@ let DefaultIsolationLevel = IsolationLevel.ReadCommitted
 
 /// Create and commit an automatically generated transaction with the given connection, isolation,
 /// cancellation token and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let commit cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -34,7 +34,7 @@ let commit cancellationToken isolationLevel
 
 /// Create and commit an automatically generated transaction with the given connection, isolation,
 /// and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let commitSync isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> #DbTransaction)
@@ -51,7 +51,7 @@ let commitSync isolationLevel
 
 /// Create and do not commit an automatically generated transaction with the given connection, isolation,
 /// cancellation token and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let notCommit cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -70,7 +70,7 @@ let notCommit cancellationToken isolationLevel
 
 /// Create and do not commit an automatically generated transaction with the given connection, isolation,
 /// and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let notCommitSync isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> #DbTransaction)
@@ -87,7 +87,7 @@ let notCommitSync isolationLevel
 /// Create and commit an automatically generated transaction with the given connection, isolation,
 /// cancellation token and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let commitOnSome cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -111,7 +111,7 @@ let commitOnSome cancellationToken isolationLevel
 /// Create and commit an automatically generated transaction with the given connection, isolation,
 /// and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let commitOnSomeSync isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> #DbTransaction)
@@ -132,7 +132,7 @@ let commitOnSomeSync isolationLevel
 /// Create and commit an automatically generated transaction with the given connection, isolation,
 /// cancellation token and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let commitOnOk cancellationToken isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> CancellationToken -> ValueTask<#DbTransaction>)
@@ -156,7 +156,7 @@ let commitOnOk cancellationToken isolationLevel
 /// Create and commit an automatically generated transaction with the given connection, isolation,
 /// and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let commitOnOkSync isolationLevel
     (connection: #DbConnection)
     (beginTransaction: #DbConnection -> IsolationLevel -> #DbTransaction)
@@ -175,45 +175,45 @@ let commitOnOkSync isolationLevel
         DbConnection.closedIfClosed wasClosed connection
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCommit connection beginTransaction body =
     commit CancellationToken.None DefaultIsolationLevel connection beginTransaction body
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCommitSync connection beginTransaction body =
     commitSync DefaultIsolationLevel connection beginTransaction body
 
 /// Create and do not commit an automatically generated transaction with the given connection and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultNotCommit connection beginTransaction body =
     notCommit CancellationToken.None DefaultIsolationLevel connection beginTransaction body
 
 /// Create and do not commit an automatically generated transaction with the given connection and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultNotCommitSync connection beginTransaction body =
     notCommitSync DefaultIsolationLevel connection beginTransaction body
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCommitOnSome connection beginTransaction body =
     commitOnSome CancellationToken.None DefaultIsolationLevel connection beginTransaction body
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCommitOnSomeSync connection beginTransaction body =
     commitOnSomeSync DefaultIsolationLevel connection beginTransaction body
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCommitOnOk connection beginTransaction body =
     commitOnOk CancellationToken.None DefaultIsolationLevel connection beginTransaction body
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCommitOnOkSync connection beginTransaction body =
     commitOnOkSync DefaultIsolationLevel connection beginTransaction body

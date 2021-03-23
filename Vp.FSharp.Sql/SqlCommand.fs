@@ -166,7 +166,7 @@ module Vp.FSharp.Sql.SqlCommand
         else tryReadNextResultRecordSync state dataReader
 
     /// Execute the command and return the sets of rows as an AsyncSeq accordingly to the command definition.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let queryAsyncSeq (connection: #DbConnection) deps conf
         (read: Read<_, _>) commandDefinition =
         asyncSeq {
@@ -209,7 +209,7 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Execute the command and return the sets of rows as an seq accordingly to the command definition.
-    /// Note: This function runs synchronously.
+    /// This function runs synchronously.
     let querySeqSync (connection: #DbConnection) deps conf
         (read: Read<_, _>) commandDefinition =
         let wasClosed = connection.State = ConnectionState.Closed
@@ -244,21 +244,21 @@ module Vp.FSharp.Sql.SqlCommand
                 ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
 
     /// Execute the command and return the sets of rows as a list accordingly to the command definition.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let queryList connection deps conf
         (read: Read<_, _>) commandDefinition =
         queryAsyncSeq connection deps conf read commandDefinition
         |> AsyncSeq.toListAsync
 
     /// Execute the command and return the sets of rows as a list accordingly to the command definition.
-    /// Note: This function runs synchronously.
+    /// This function runs synchronously.
     let queryListSync connection deps conf
         (read: Read<_, _>) commandDefinition =
         querySeqSync connection deps conf read commandDefinition
         |> Seq.toList
 
     /// Execute the command and return the first set of rows as a list accordingly to the command definition.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let querySetList (connection: #DbConnection) deps conf
         (read: ReadSet<_, _>) commandDefinition =
         async {
@@ -271,7 +271,7 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Execute the command and return the first set of rows as a list accordingly to the command definition.
-    /// Note: This function runs synchronously.
+    /// This function runs synchronously.
     let querySetListSync (connection: #DbConnection) deps conf
         (read: ReadSet<_, _>) commandDefinition =
         let setList = ResizeArray()
@@ -282,7 +282,7 @@ module Vp.FSharp.Sql.SqlCommand
         setList |> Seq.toList
 
     /// Return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let querySetList2 connection deps conf
         (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) commandDefinition =
         async {
@@ -297,7 +297,7 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
-    /// Note: This function runs synchronously.
+    /// This function runs synchronously.
     let querySetList2Sync connection deps conf
         (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) commandDefinition =
         let set1List = ResizeArray()
@@ -310,7 +310,7 @@ module Vp.FSharp.Sql.SqlCommand
         (set1List |> Seq.toList, set2List |> Seq.toList)
 
     /// Return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let querySetList3 connection deps conf
         (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) (read3: ReadSet<_, _>) commandDefinition =
         async {
@@ -327,7 +327,7 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
-    /// Note: This function runs synchronously.
+    /// This function runs synchronously.
     let querySetList3Sync connection deps conf
         (read1: ReadSet<_, _>) (read2: ReadSet<_, _>) (read3: ReadSet<_, _>) commandDefinition =
         let set1List = ResizeArray()
@@ -344,7 +344,7 @@ module Vp.FSharp.Sql.SqlCommand
     /// Execute the command accordingly to its definition and,
     /// - return the first cell value, if it is available and of the given type.
     /// - throw an exception, otherwise.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let executeScalar<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
@@ -384,7 +384,7 @@ module Vp.FSharp.Sql.SqlCommand
     /// Execute the command accordingly to its definition and,
     /// - return the first cell value, if it is available and of the given type.
     /// - throw an exception, otherwise.
-    /// Note: This function runs synchronously.
+    /// This function runs synchronously.
     let executeScalarSync<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         let wasClosed = connection.State = ConnectionState.Closed
         let log sqlLog = log4 conf commandDefinition sqlLog
@@ -422,7 +422,7 @@ module Vp.FSharp.Sql.SqlCommand
     /// - return Some, if the first cell is available and of the given type.
     /// - return None, if first cell is DBNull.
     /// - throw an exception, otherwise.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let executeScalarOrNone<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
@@ -460,7 +460,7 @@ module Vp.FSharp.Sql.SqlCommand
     /// - return Some, if the first cell is available and of the given type.
     /// - return None, if first cell is DBNull.
     /// - throw an exception, otherwise.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let executeScalarOrNoneSync<'Scalar, .. > (connection: #DbConnection) deps conf commandDefinition =
         let wasClosed = connection.State = ConnectionState.Closed
         let log sqlLog = log4 conf commandDefinition sqlLog
@@ -492,7 +492,7 @@ module Vp.FSharp.Sql.SqlCommand
                 ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
 
     /// Execute the command accordingly to its definition and, return the number of rows affected.
-    /// Note: This function runs asynchronously.
+    /// This function runs asynchronously.
     let executeNonQuery (connection: #DbConnection) deps conf commandDefinition =
         async {
             let! linkedToken = Async.linkedTokenSourceFrom commandDefinition.CancellationToken
@@ -521,7 +521,7 @@ module Vp.FSharp.Sql.SqlCommand
         }
 
     /// Execute the command accordingly to its definition and, return the number of rows affected.
-    /// Note: This function runs synchronously.
+    /// This function runs synchronously.
     let executeNonQuerySync (connection: #DbConnection) deps conf commandDefinition =
         let wasClosed = connection.State = ConnectionState.Closed
         let log sqlLog = log4 conf commandDefinition sqlLog

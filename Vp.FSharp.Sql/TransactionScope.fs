@@ -53,7 +53,7 @@ let private startScope3 isolationLevel timeout scopeOption
 
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, connection and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let complete cancellationToken isolationLevel timeout scopeOption (connection: #DbConnection) body =
     async {
         let closed = DbConnection.isClosed connection
@@ -72,7 +72,7 @@ let complete cancellationToken isolationLevel timeout scopeOption (connection: #
 
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, connection and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let completeSync isolationLevel timeout scopeOption (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
     try
@@ -88,7 +88,7 @@ let completeSync isolationLevel timeout scopeOption (connection: #DbConnection) 
 
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let complete2 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
@@ -112,7 +112,7 @@ let complete2 cancellationToken isolationLevel timeout scopeOption
 
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 2 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let complete2Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
@@ -131,7 +131,7 @@ let complete2Sync isolationLevel timeout scopeOption
 
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let complete3 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
@@ -156,7 +156,7 @@ let complete3 cancellationToken isolationLevel timeout scopeOption
 
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 3 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let complete3Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
@@ -178,7 +178,7 @@ let complete3Sync isolationLevel timeout scopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, connection and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let notComplete cancellationToken isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     async {
@@ -195,7 +195,7 @@ let notComplete cancellationToken isolationLevel timeout scopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given
 /// timeout, scope option, connection and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let notCompleteSync isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
@@ -209,7 +209,7 @@ let notCompleteSync isolationLevel timeout scopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let notComplete2 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
@@ -229,7 +229,7 @@ let notComplete2 cancellationToken isolationLevel timeout scopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given
 /// timeout, scope option, 2 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let notComplete2Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
@@ -246,7 +246,7 @@ let notComplete2Sync isolationLevel timeout scopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let notComplete3 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection)
     body =
@@ -270,7 +270,7 @@ let notComplete3 cancellationToken isolationLevel timeout scopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given
 /// timeout, scope option, 3 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let notComplete3Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection)
     body =
@@ -292,7 +292,7 @@ let notComplete3Sync isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let completeOnSome cancellationToken isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     async {
@@ -316,7 +316,7 @@ let completeOnSome cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// token, timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let completeOnSomeSync isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
@@ -337,7 +337,7 @@ let completeOnSomeSync isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let completeOnSome2 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
@@ -364,7 +364,7 @@ let completeOnSome2 cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let completeOnSome2Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
@@ -388,7 +388,7 @@ let completeOnSome2Sync isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let completeOnSome3 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
@@ -418,7 +418,7 @@ let completeOnSome3 cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let completeOnSome3Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
@@ -445,7 +445,7 @@ let completeOnSome3Sync isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let completeOnOk cancellationToken isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     async {
@@ -469,7 +469,7 @@ let completeOnOk cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let completeOnOkSync isolationLevel timeout scopeOption
     (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
@@ -490,7 +490,7 @@ let completeOnOkSync isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let completeOnOk2 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     async {
@@ -517,7 +517,7 @@ let completeOnOk2 cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let completeOnOk2Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
@@ -541,7 +541,7 @@ let completeOnOk2Sync isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let completeOnOk3 cancellationToken isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     async {
@@ -571,7 +571,7 @@ let completeOnOk3 cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let completeOnOk3Sync isolationLevel timeout scopeOption
     (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
@@ -597,157 +597,157 @@ let completeOnOk3Sync isolationLevel timeout scopeOption
         DbConnection.closedIfClosed closed3 connection3
 
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultComplete body =
     body
     |> complete CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteSync body =
     body
     |> completeSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultComplete2 body =
     body
     |> complete2 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultComplete2Sync body =
     body
     |> complete2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultComplete3 body =
     body
     |> complete3 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultComplete3Sync body =
     body
     |> complete3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given connection and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultNotComplete body =
     body
     |> notComplete CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given connection and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultNotCompleteSync body =
     body
     |> notCompleteSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given 2 connections and transaction body.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultNotComplete2 body =
     body
     |> notComplete2 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given 2 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultNotComplete2Sync body =
     body
     |> notComplete2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given 3 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultNotComplete3 body =
     body
     |> notComplete3 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given 3 connections and transaction body.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultNotComplete3Sync body =
     body
     |> notComplete3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteOnSome body =
     body
     |> completeOnSome CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteOnSomeSync body =
     body
     |> completeOnSomeSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCompleteOnSome2 body =
     body
     |> completeOnSome2 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteOnSome2Sync body =
     body
     |> completeOnSome2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCompleteOnSome3 body =
     body
     |> completeOnSome3 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteOnSome3Sync body =
     body
     |> completeOnSome3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCompleteOnOk body =
     body
     |> completeOnOk CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteOnOkSync body =
     body
     |> completeOnOkSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCompleteOnOk2 body =
     body
     |> completeOnOk2 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteOnOk2Sync body =
     body
     |> completeOnOk2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs asynchronously.
+/// This function runs asynchronously.
 let defaultCompleteOnOk3 body =
     body
     |> completeOnOk3 CancellationToken.None DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
-/// Note: This function runs synchronously.
+/// This function runs synchronously.
 let defaultCompleteOnOk3Sync body =
     body
     |> completeOnOk3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
