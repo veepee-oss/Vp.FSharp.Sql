@@ -21,7 +21,8 @@ Examples of unacceptable behavior by participants include:
 - Public or private harassment
 - Publishing others' private information, such as a physical or electronic address, without explicit permission
 - Other conduct which could reasonably be considered inappropriate in a professional setting
-- Our Responsibilities
+
+### Our Responsibilities
 - Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
 
 Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviors that they deem inappropriate, threatening, offensive, or harmful.
@@ -52,7 +53,7 @@ Guidelines for bug reports:
 
 1. Use the GitHub issue search — check if the issue has already been reported.
 2. Check if the issue has been fixed — try to reproduce it using the `main` branch in the repository.
-3. and report the problem — ideally create a reduced test case.
+3. Report the problem — ideally create a reduced test case.
 
 Please try to be as detailed as possible in your report. Include information about your Operating System, as well as your dotnet (or mono \ .Net Framework), F# and project versions. Please provide steps to reproduce the issue as well as the outcome you were expecting! All these details will help developers to fix any potential bugs.
 
@@ -89,7 +90,7 @@ Please adhere to the coding conventions in the project (indentation, accurate co
    # Navigate to the newly cloned directory
    cd Vp.FSharp.Sql
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/fsprojects/Vp.FSharp.Sql
+   git remote add upstream https://github.com/veepee-oss/Vp.FSharp.Sql
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream, and update your fork:
