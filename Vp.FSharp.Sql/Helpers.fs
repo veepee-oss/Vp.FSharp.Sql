@@ -23,6 +23,9 @@ module DbConnection  =
     let openIfClosed cancellationToken closed (connection: #DbConnection) =
         async { if closed then do! connection.OpenAsync(cancellationToken) |> Async.AwaitTask }
 
+    let openIfClosedSync closed (connection: #DbConnection) =
+        if closed then connection.Open()
+
     let closedIfClosed closed (connection: #DbConnection) =
         if closed then connection.Close()
 
@@ -36,7 +39,10 @@ type DbDataReader with
             if nextResultOk then return! this.AwaitRead(cancellationToken)
             else return nextResultOk
         }
-
+    member this.TryReadNextResult() =
+        let nextResultOk = this.NextResult()
+        if nextResultOk then this.Read()
+        else nextResultOk
 
 [<RequireQualifiedAccess>]
 module String =
@@ -86,6 +92,12 @@ module SkipFirstAsyncSeq =
         |> AsyncSeq.skip(1)
 
 [<RequireQualifiedAccess>]
+module SkipFirstSeq =
+    let scan folder state source =
+        Seq.scan folder state source
+        |> Seq.skip(1)
+
+[<RequireQualifiedAccess>]
 module AsyncSeq =
 
     let mapbi mapping source =
@@ -109,6 +121,31 @@ module AsyncSeq =
         |> AsyncSeq.map(fun (_, mappedItem, item) -> (item, mappedItem))
 
     let consume source = AsyncSeq.iter(fun _ -> ()) source
+
+[<RequireQualifiedAccess>]
+module Seq =
+
+    let mapbi mapping source =
+        source
+        |> SkipFirstSeq.scan(fun state item -> (fst state + 1I, item)) (-1I, def)
+        |> Seq.map(fun (bi, item) -> mapping bi item)
+
+    let mapChange selector mapping source =
+        source
+        |> mapbi (fun bi item -> (bi, item))
+        |> Seq.scan(fun (previousSelection, previousMappedItem, _) (bi, item) ->
+            if bi = 0I then
+                (selector item, mapping item, item)
+            else
+                let currentSelection = selector item
+                let mappedItem = mapping item
+                if previousSelection <> currentSelection then (currentSelection, mappedItem, item)
+                else (previousSelection, previousMappedItem, item)
+            ) (def, def, def)
+        |> Seq.skip 1
+        |> Seq.map(fun (_, mappedItem, item) -> (item, mappedItem))
+
+    let consume source = Seq.iter(fun _ -> ()) source
 
 module DbNull =
     let is<'T>() = typedefof<'T> = typedefof<DBNull>
