@@ -16,7 +16,7 @@
 - We also wanted something even more explicit and more functional / F#-idiomatic
 - Inspired by [Zaid's Npgsql.FSharp](https://github.com/Zaid-Ajaj/Npgsql.FSharp) but with
     - Multi DB-providers support through specialization (but no specialization through inheritance).
-    - It might sound controversial (again) to some people in the F# community to not rely heavily on OO for 
+      - It might sound controversial (again) to some people in the F# community to not rely heavily on OO for 
       this kind of design decision but "haters will hate" and we, well, we will be just fine, we love you, regardless.
     - Explicit operations flow
     - `Transaction` and `TransactionScope` Helpers

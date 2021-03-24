@@ -4,11 +4,11 @@ The core library that enables you to work with F# and any ADO provider, _consist
 
 In most cases, this library is only used for creating other F# libraries leveraging the relevant ADO providers.
 
-If you just wanna execute SQL commands a-la-F#, you might want to look at [this section](#-how-to-use-this-library)
+If you just want to execute SQL commands a-la-F#, you might want to look at [this section](#-how-to-use-this-library).
 
 # ✨ Slagging Hype
 
-We aim at following "highly controversial practices" to the best of our ability!
+We follow "highly controversial practices" to the best of our ability!
 
 Status     | Package                
 ---------- | ----------------------
@@ -30,7 +30,7 @@ TBD        | [![Semantic Release](https://img.shields.io/badge/Semantic%20Releas
 
 # 📚 How to use this library?
 
-This library mostly aims at being used as some sort of foundation to build other libraries with the relevant ADO.NET providers to provide a strongly-typed experience. 
+This library mostly aims to be a foundation for building other libraries with the relevant ADO.NET providers to provide a strongly-typed experience.
 
 You can check out the libraries below, each leveraging `Vp.FSharp.Sql` and the relevant ADO.NET provider:
 
@@ -40,7 +40,7 @@ Name                                          | ADO.NET Provider                
 [`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]   | [`Microsoft.Data.SqlClient`](https://www.nuget.org/packages/Microsoft.Data.SqlClient)  | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer) | `Install-Package Vp.FSharp.Sql.SqlServer`
 [`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [`Npgsql`](https://www.nuget.org/packages/Npgsql)                                      | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)   | `Install-Package Vp.FSharp.Sql.PostgreSql`
 
-In a Nutshell you can create your own complete provider, but you're free to just go with only some particular bits.
+In a nutshell, you can create your own complete provider, but you're free to just go with only the things you need.
 
 Let's walk-through the [`Vp.FSharp.Sql.Sqlite` provider implementation][sqlite-repo].
 
@@ -48,7 +48,7 @@ Let's walk-through the [`Vp.FSharp.Sql.Sqlite` provider implementation][sqlite-r
 
 First you need the most important type of all, the database value type. 
 
-In the case of SQLite, `SqliteDbValue` can modeled as a simple DU:
+In the case of SQLite, `SqliteDbValue` can modeled as a simple discriminated union (DU):
 
 ```fsharp
 /// Native SQLite DB types.
@@ -67,7 +67,7 @@ These cases are created after [the official SQLite documentation](https://www.sq
 
 This is where we convert the DU exposed in the public API to an actual `DbParameter`-compatible class that can be consumed from the Core library functions.
 
-In most scenarios, the implementation consists in writing a pattern match on the different database value type cases and creating the relevant `DbParameter` specific type available in the ADO.NET provider, if any:
+In most scenarios, the implementation consists of writing pattern matches on the different database value type cases and creating the relevant `DbParameter` specific types available in the ADO.NET provider, if any:
 
 ```fsharp
 let dbValueToParameter name value =
@@ -126,25 +126,23 @@ let executeReaderAsync (command: SQLiteCommand) _ =
   DbValueToParameter = Constants.DbValueToParameter }
 ```
 
-In this particular case, `System.Data.SQLite` the most specific types are only available through the non-asynchronous API.
+In this particular case, `System.Data.SQLite`, the most specific types are only available through the non-asynchronous API.
 
 For instance, we use `command.ExecuteReader` instead of `command.ExecuteDbDataReader` because of: 
 - [`SQLiteCommand.ExecuteDbDataReader()`](https://github.com/haf/System.Data.SQLite/blob/master/System.Data.SQLite/SQLiteCommand.cs#L664-L667)
 - [`SQLiteCommand.ExecuteReader()`](https://github.com/haf/System.Data.SQLite/blob/master/System.Data.SQLite/SQLiteCommand.cs#L868-L873)
 
-Also, as you may have noticed there is no occurence of an asynchronous API.
-
-Meaning that the asynchronous relies on the base class implementation: 
+Also, as you may have noticed there is no occurence of an asynchronous API, meaning that the asynchronous relies on the base class implementation: 
 - [`DbCommand.ExecuteReaderAsync()`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Data.Common/src/System/Data/Common/DbCommand.cs#L150-L151)
 - [`DbCommand.ExecuteDbDataReader(CommandBehavior behavior)`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Data.Common/src/System/Data/Common/DbCommand.cs#L107)
 
 which is just an asynchronous wrapper around the synchronous version.
 
-Similarly when it comes to `connection.BeginTransaction` instead of `command.BeginTransactionAsync`:
+Similarly, when it comes to `connection.BeginTransaction` instead of `command.BeginTransactionAsync`:
 - [`SQLiteConnection.BeginTransaction()`](https://github.com/haf/System.Data.SQLite/blob/master/System.Data.SQLite/SQLiteConnection.cs#L1474-L1478)
 - [`DbConnection.BeginTransactionAsync()`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Data.Common/src/System/Data/Common/DbConnection.cs#L84-L85)
 
-This example alone shows the kind of discrepancies you can expect to find in the most ADO.NET provider implementations available out there.
+This example alone shows the kind of discrepancies you can expect to find in the most available ADO.NET provider implementations.
 
 ## ⌨ Command Definition
 
@@ -166,7 +164,7 @@ This can be later on used with the `SqlCommand` functions which accept `CommandD
 
 ## 📀 Configuration
 
-This yet another specialization in terms of generic constraints:
+There is yet another specialization in terms of generic constraints:
 
 ```fsharp
 /// SQLite Configuration
@@ -176,12 +174,12 @@ type SqliteConfiguration =
         SQLiteCommand>
 ```
 
-This type is also yet another binder for types and acts as a cache, it will be passed along with the command definition when executing a command.
+This type is another binder for types and acts as a cache; it will be passed along with the command definition when executing a command.
 
 
 ## 🏗️ Command Construction
 
-It's fairly straightforward, all you need to do is:
+This is fairly straightforward, all you need to do is:
 - Create a new module (if you want to).
 - Define the construction functions relevant to your library and pass the command definition to the `SqlCommand` core functions.
 
@@ -233,7 +231,7 @@ let transaction value (commandDefinition: SqliteCommandDefinition) : SqliteComma
 
 ## ⚙ Command Execution
 
-Likewise, the command execution follows the same principles, aka passing the relevant strongly-typed parameters (corresponding to your current and specific ADO.NET provider) to the SQLCommand core functions.
+Likewise, command execution follows the same principles, aka passing the relevant strongly-typed parameters (corresponding to your current and specific ADO.NET provider) to the SQLCommand core functions.
 
 ```fsharp
 module Vp.FSharp.Sql.Sqlite.SqliteCommand
@@ -352,7 +350,7 @@ let executeNonQuerySync connection (commandDefinition: SqliteCommandDefinition) 
 
 ## 🦮 Null Helpers
 
-Again, we can create another module and the rest is all about passing the relevant parameters to the underlying core functions.
+We can create another module for null helpers, and the rest is all about passing the relevant parameters to the underlying core functions.
 
 ```fsharp
 [<RequireQualifiedAccess>]
@@ -370,7 +368,7 @@ let ifError toDbValue = NullDbValue.ifError toDbValue (fun _ -> SqliteDbValue.Nu
 
 ## 🚄 Transaction Helpers
 
-Same old, same old here too.
+More of the same here too.
 
 ```fsharp
 [<RequireQualifiedAccess>]
@@ -482,12 +480,11 @@ These helpers work regardless of the ADO.NET provider you're using as long as it
 
 ⚠ That being said, **we strongly discourage you from using those helpers**:
 - 🚨 Bear in mind that [the support for distributed transactions is not yet available](https://github.com/dotnet/runtime/issues/715) since the .NET core era. 
-- 🚨 Using `TransactionScope` (with or without those helpers) is very error-prone and you might bump into unexpected behaviours without benefiting from clear error messages.
-- 🚨 Considering that there is very little evolution regarding the support for distributed transactions and therefore there is somehow limited applications to use the `TransactionScope` 
-  without this very same support for distributed transactions, those helpers might very much move to a separate library (i.e. repository + nuget package).
+- 🚨 Using `TransactionScope` (with or without those helpers) is very error-prone, and you might encounter unexpected behaviours without clear error messages.
+- 🚨 Considering that there is very little evolution regarding this support, and therefore there is somehow limited applications to use the `TransactionScope` 
+  without the support for distributed transactions, those helpers might move to a separate library (i.e. repository + nuget package).
 
 If you need a viable workaround to 2PC or distributed transactions, you might want to check some architectural patterns such as [the Saga Pattern](https://www.youtube.com/watch?v=xDuwrtwYHu8).
-
 
 # ❤ How to Contribute
 Bug reports, feature requests, and pull requests are very welcome!
