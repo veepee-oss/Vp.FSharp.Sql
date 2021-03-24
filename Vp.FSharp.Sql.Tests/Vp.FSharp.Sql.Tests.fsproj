@@ -10,11 +10,16 @@
   <ItemGroup>
     <Compile Include="Mocks.fs" />
     <Compile Include="Helpers.fs" />
-    <Compile Include="SqlCommand for executeNonQuery should.fs" />
-    <Compile Include="SqlCommand for executeScalar should.fs" />
-    <Compile Include="SqlCommand for querySetListN should.fs" />
+    <Compile Include="SqlCommand for queryAsyncSeqSync should.fs" />
+    <Compile Include="SqlCommand for querySetListNSync should.fs" />
+    <Compile Include="SqlCommand for executeScalarSync should.fs" />
+    <Compile Include="SqlCommand for executeScalarOrNoneSync should.fs" />
+    <Compile Include="SqlCommand for executeNonQuerySync should.fs" />
     <Compile Include="SqlCommand for queryAsyncSeq should.fs" />
+    <Compile Include="SqlCommand for querySetListN should.fs" />
+    <Compile Include="SqlCommand for executeScalar should.fs" />
     <Compile Include="SqlCommand for executeScalarOrNone should.fs" />
+    <Compile Include="SqlCommand for executeNonQuery should.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
