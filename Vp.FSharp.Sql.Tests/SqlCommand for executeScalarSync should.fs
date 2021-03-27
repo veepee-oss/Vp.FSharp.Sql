@@ -24,19 +24,17 @@ let ``open and then close the connection if initially closed`` () =
                       NativeTypeName = typeof<int32>.Name }
                 ]]
 
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf None
-        let! outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.noLogger
-            |> SqlCommand.executeScalar connection deps conf
-        outcome =! 14
-        PartialCallCounter.assertEqual callCounter 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf None
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.noLogger
+        |> SqlCommand.executeScalarSync connection deps conf
+    outcome =! 14
+    PartialCallCounter.assertEqual callCounter 1 1
 
 [<Fact>]
 let ``leave the connection open if initially open`` () =
@@ -52,19 +50,17 @@ let ``leave the connection open if initially open`` () =
                       NativeTypeName = typeof<int32>.Name }
                 ]]
 
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf None
-        let! outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.noLogger
-            |> SqlCommand.executeScalar connection deps conf
-        outcome =! 15
-        PartialCallCounter.assertEqual callCounter 0 0
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf None
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.noLogger
+        |> SqlCommand.executeScalarSync connection deps conf
+    outcome =! 15
+    PartialCallCounter.assertEqual callCounter 0 0
 
 [<Fact>]
 let ``log for all events on globalLogger if connection initially closed`` () =
@@ -79,18 +75,16 @@ let ``log for all events on globalLogger if connection initially closed`` () =
                       FieldType = typeof<int32>
                       NativeTypeName = typeof<int32>.Name }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf (Some loggerCallback)
-        let! outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.executeScalar connection deps conf
-        outcome =! 16
-        FullCallCounter.assertEqual callCounter 1 1 1 1 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf (Some loggerCallback)
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.executeScalarSync connection deps conf
+    outcome =! 16
+    FullCallCounter.assertEqual callCounter 1 1 1 1 1 1
 
 [<Fact>]
 let ``log for just command events on globalLogger if connection initially not closed`` () =
@@ -105,15 +99,13 @@ let ``log for just command events on globalLogger if connection initially not cl
                       FieldType = typeof<int32>
                       NativeTypeName = typeof<int32>.Name }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf (Some loggerCallback)
-        let! outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.executeScalar connection deps conf
-        outcome =! 17
-        FullCallCounter.assertEqual callCounter 0 0 0 0 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf (Some loggerCallback)
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.executeScalarSync connection deps conf
+    outcome =! 17
+    FullCallCounter.assertEqual callCounter 0 0 0 0 1 1
