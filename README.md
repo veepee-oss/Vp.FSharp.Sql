@@ -128,11 +128,11 @@ let executeReaderAsync (command: SQLiteCommand) _ =
 
 In this particular case, `System.Data.SQLite`, the most specific types are only available through the non-asynchronous API.
 
-For instance, we use `command.ExecuteReader` instead of `command.ExecuteDbDataReader` because of: 
+For instance, we use `command.ExecuteReader` instead of `command.ExecuteDbDataReader` because of the return type is the most specific one: 
 - [`SQLiteCommand.ExecuteDbDataReader()`](https://github.com/haf/System.Data.SQLite/blob/master/System.Data.SQLite/SQLiteCommand.cs#L664-L667)
 - [`SQLiteCommand.ExecuteReader()`](https://github.com/haf/System.Data.SQLite/blob/master/System.Data.SQLite/SQLiteCommand.cs#L868-L873)
 
-Also, as you may have noticed there is no occurence of an asynchronous API, meaning that the asynchronous relies on the base class implementation: 
+Also, as you may have noticed there is no occurence of an asynchronous API, meaning that the asynchronous "implementation" (or lack of thereof) relies on the base class implementation: 
 - [`DbCommand.ExecuteReaderAsync()`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Data.Common/src/System/Data/Common/DbCommand.cs#L150-L151)
 - [`DbCommand.ExecuteDbDataReader(CommandBehavior behavior)`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Data.Common/src/System/Data/Common/DbCommand.cs#L107)
 
