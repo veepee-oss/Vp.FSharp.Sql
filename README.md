@@ -226,7 +226,6 @@ let prepare value (commandDefinition: SqliteCommandDefinition) : SqliteCommandDe
 /// Update the command definition and sets whether the command should be wrapped in the given transaction.
 let transaction value (commandDefinition: SqliteCommandDefinition) : SqliteCommandDefinition =
     SqlCommand.transaction value commandDefinition
-
 ```
 
 ## ⚙ Command Execution
@@ -234,12 +233,6 @@ let transaction value (commandDefinition: SqliteCommandDefinition) : SqliteComma
 Likewise, command execution follows the same principles, aka passing the relevant strongly-typed parameters (corresponding to your current and specific ADO.NET provider) to the SQLCommand core functions.
 
 ```fsharp
-module Vp.FSharp.Sql.Sqlite.SqliteCommand
-
-open Vp.FSharp.Sql
-
-
-// [...Command Construction Functions...]
 
 /// Execute the command and return the sets of rows as an AsyncSeq accordingly to the command definition.
 /// This function runs asynchronously.
@@ -388,7 +381,7 @@ let commit cancellationToken isolationLevel connection body =
     Transaction.commit cancellationToken isolationLevel connection beginTransactionAsync body
 
 /// Create and commit an automatically generated transaction with the given connection, isolation,
-/// cancellation token and transaction body.
+/// and transaction body.
 /// This function runs synchronously.
 let commitSync isolationLevel connection body =
     Transaction.commitSync isolationLevel connection beginTransaction body
@@ -439,14 +432,14 @@ let defaultCommit connection body = Transaction.defaultCommit connection beginTr
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
 /// This function runs synchronously.
-let defaultCommitSync connection body = Transaction.defaultNotCommitSync connection beginTransaction body
+let defaultCommitSync connection body = Transaction.defaultCommitSync connection beginTransaction body
 
 /// Create and do not commit an automatically generated transaction with the given connection and transaction body.
 /// This function runs asynchronously.
 let defaultNotCommit connection body = Transaction.defaultNotCommit connection beginTransactionAsync body
 
 /// Create and do not commit an automatically generated transaction with the given connection and transaction body.
-/// This function runs asynchronously.
+/// This function runs synchronously.
 let defaultNotCommitSync connection body = Transaction.defaultNotCommitSync connection beginTransaction body
 
 /// Create and commit an automatically generated transaction with the given connection and transaction body.
