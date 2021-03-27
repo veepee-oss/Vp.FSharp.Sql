@@ -59,23 +59,21 @@ let ``open and then close the connection if initially closed and access value by
                       NativeTypeName = typeof<int32>.Name
                     }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf None
-        let outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps conf
-               (readValueByFieldName ([2;1;0] |> toFieldNames))
-            |> AsyncSeq.toListSynchronously
-            |> List.sortBy (fun values -> snd values.[0])
-        outcome.Length =! 2
-        outcome =! [[("id2", 3);("id1", 2);("id0", 1)];[("id2", 6);("id1", 5);("id0", 4)]]
-        PartialCallCounter.assertEqual callCounter 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf None
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.noLogger
+        |> SqlCommand.querySeqSync connection deps conf
+           (readValueByFieldName ([2;1;0] |> toFieldNames))
+        |> Seq.toList
+        |> List.sortBy (fun values -> snd values.[0])
+    outcome.Length =! 2
+    outcome =! [[("id2", 3);("id1", 2);("id0", 1)];[("id2", 6);("id1", 5);("id0", 4)]]
+    PartialCallCounter.assertEqual callCounter 1 1
 
 [<Fact>]
 let ``open and then close the connection if initially closed and access value by ordinal`` () =
@@ -100,23 +98,21 @@ let ``open and then close the connection if initially closed and access value by
                       NativeTypeName = typeof<int32>.Name
                     }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf None
-        let outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps conf
-               (readValueByIndex [2;1;0])
-            |> AsyncSeq.toListSynchronously
-            |> List.sortBy (fun values -> values.[0])
-        outcome.Length =! 2
-        outcome =! [[3;2;1];[6;5;4]]
-        PartialCallCounter.assertEqual callCounter 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf None
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.noLogger
+        |> SqlCommand.querySeqSync connection deps conf
+           (readValueByIndex [2;1;0])
+        |> Seq.toList
+        |> List.sortBy (fun values -> values.[0])
+    outcome.Length =! 2
+    outcome =! [[3;2;1];[6;5;4]]
+    PartialCallCounter.assertEqual callCounter 1 1
 
 [<Fact>]
 let ``open and then close the connection if initially closed and access valueOrNone by columnName`` () =
@@ -141,23 +137,21 @@ let ``open and then close the connection if initially closed and access valueOrN
                       NativeTypeName = typeof<int>.Name
                     }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf None
-        let outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps conf
-               (readValueOrNoneByFieldName (toFieldNames [2;1;0]))
-            |> AsyncSeq.toListSynchronously
-            |> List.sortBy (fun values -> snd values.[0])
-        outcome.Length =! 2
-        outcome =! [[("id2", Some 3);("id1", None);("id0", Some 1)];[("id2", Some 6);("id1", Some 5);("id0", Some 4)]]
-        PartialCallCounter.assertEqual callCounter 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf None
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.noLogger
+        |> SqlCommand.querySeqSync connection deps conf
+           (readValueOrNoneByFieldName (toFieldNames [2;1;0]))
+        |> Seq.toList
+        |> List.sortBy (fun values -> snd values.[0])
+    outcome.Length =! 2
+    outcome =! [[("id2", Some 3);("id1", None);("id0", Some 1)];[("id2", Some 6);("id1", Some 5);("id0", Some 4)]]
+    PartialCallCounter.assertEqual callCounter 1 1
 
 [<Fact>]
 let ``open and then close connection if initially closed and access valueOrNone by ordinal`` () =
@@ -182,23 +176,21 @@ let ``open and then close connection if initially closed and access valueOrNone 
                       NativeTypeName = typeof<int32>.Name
                     }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf None
-        let outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps conf
-               (readValueOrNoneByIndex [2;1;0])
-            |> AsyncSeq.toListSynchronously
-            |> List.sortBy (fun values -> values.[0])
-        outcome.Length =! 2
-        outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        PartialCallCounter.assertEqual callCounter 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf None
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.noLogger
+        |> SqlCommand.querySeqSync connection deps conf
+           (readValueOrNoneByIndex [2;1;0])
+        |> Seq.toList
+        |> List.sortBy (fun values -> values.[0])
+    outcome.Length =! 2
+    outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
+    PartialCallCounter.assertEqual callCounter 1 1
 
 [<Fact>]
 let ``leave the connection open if initially not closed with access valueOrNone by ordinal`` () =
@@ -223,23 +215,21 @@ let ``leave the connection open if initially not closed with access valueOrNone 
                       NativeTypeName = typeof<int32>.Name
                     }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf None
-        let outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.noLogger
-            |> SqlCommand.queryAsyncSeq connection deps conf
-               (readValueOrNoneByIndex [2;1;0])
-            |> AsyncSeq.toListSynchronously
-            |> List.sortBy (fun values -> values.[0])
-        outcome.Length =! 2
-        outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        PartialCallCounter.assertEqual callCounter 0 0
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf None
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.noLogger
+        |> SqlCommand.querySeqSync connection deps conf
+           (readValueOrNoneByIndex [2;1;0])
+        |> Seq.toList
+        |> List.sortBy (fun values -> values.[0])
+    outcome.Length =! 2
+    outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
+    PartialCallCounter.assertEqual callCounter 0 0
 
 [<Fact>]
 let ``log all events on globalLogger if connection initially closed with access valueOrNone by ordinal`` () =
@@ -264,22 +254,20 @@ let ``log all events on globalLogger if connection initially closed with access 
                       NativeTypeName = typeof<int32>.Name
                     }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf (Some loggerCallback)
-        let outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.queryAsyncSeq connection deps conf
-               (readValueOrNoneByIndex [2;1;0])
-            |> AsyncSeq.toListSynchronously
-            |> List.sortBy (fun values -> values.[0])
-        outcome.Length =! 2
-        outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        FullCallCounter.assertEqual callCounter 1 1 1 1 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf (Some loggerCallback)
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.querySeqSync connection deps conf
+           (readValueOrNoneByIndex [2;1;0])
+        |> Seq.toList
+        |> List.sortBy (fun values -> values.[0])
+    outcome.Length =! 2
+    outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
+    FullCallCounter.assertEqual callCounter 1 1 1 1 1 1
 
 [<Fact>]
 let ``log for just command events on globalLogger if connection initially not closed with access valueOrNone by ordinal`` () =
@@ -304,19 +292,17 @@ let ``log for just command events on globalLogger if connection initially not cl
                       NativeTypeName = typeof<int32>.Name
                     }
                 ]]
-    async {
-        use connection =
-            Mocks.Reader (Mocks.makeReader data)
-            |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
-        let deps = Mocks.makeDeps None
-        let conf = Mocks.makeConf (Some loggerCallback)
-        let outcome =
-            SqlCommand.text "select 1"
-            |> SqlCommand.queryAsyncSeq connection deps conf
-               (readValueOrNoneByIndex [2;1;0])
-            |> AsyncSeq.toListSynchronously
-            |> List.sortBy (fun values -> values.[0])
-        outcome.Length =! 2
-        outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
-        FullCallCounter.assertEqual callCounter 0 0 0 0 1 1
-    }
+    use connection =
+        Mocks.Reader (Mocks.makeReader data)
+        |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
+    let deps = Mocks.makeDeps None
+    let conf = Mocks.makeConf (Some loggerCallback)
+    let outcome =
+        SqlCommand.text "select 1"
+        |> SqlCommand.querySeqSync connection deps conf
+           (readValueOrNoneByIndex [2;1;0])
+        |> Seq.toList
+        |> List.sortBy (fun values -> values.[0])
+    outcome.Length =! 2
+    outcome =! [[Some 3; None; Some 1];[Some 6; Some 5; Some 4]]
+    FullCallCounter.assertEqual callCounter 0 0 0 0 1 1

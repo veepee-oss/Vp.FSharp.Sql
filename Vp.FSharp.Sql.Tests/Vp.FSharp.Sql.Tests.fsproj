@@ -10,7 +10,7 @@
   <ItemGroup>
     <Compile Include="Mocks.fs" />
     <Compile Include="Helpers.fs" />
-    <Compile Include="SqlCommand for queryAsyncSeqSync should.fs" />
+    <Compile Include="SqlCommand for querySeqSync should.fs" />
     <Compile Include="SqlCommand for querySetListNSync should.fs" />
     <Compile Include="SqlCommand for executeScalarSync should.fs" />
     <Compile Include="SqlCommand for executeScalarOrNoneSync should.fs" />
