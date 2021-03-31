@@ -50,7 +50,9 @@ First you need the most important type of all, the database value type.
 
 In the case of SQLite, `SqliteDbValue` can modeled as a simple discriminated union (DU):
 
-```fsharp
+<!-- snippet: SqliteDbValue -->
+<a id='snippet-sqlitedbvalue'></a>
+```fs
 /// Native SQLite DB types.
 /// See https://www.sqlite.org/datatype3.html
 type SqliteDbValue =
@@ -60,6 +62,8 @@ type SqliteDbValue =
     | Text of string
     | Blob of byte array
 ```
+<sup><a href='/Vp.FSharp.Sql.Tests/Snippets.fs#L3-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-sqlitedbvalue' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 These cases are created after [the official SQLite documentation](https://www.sqlite.org/datatype3.html).
 

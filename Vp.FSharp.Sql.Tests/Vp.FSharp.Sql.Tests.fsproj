@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Snippets.fs" />
     <Compile Include="Mocks.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="SqlCommand for querySeqSync should.fs" />
@@ -25,6 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="FsCheck.Xunit" Version="3.0.0-alpha4" />
+    <PackageReference Include="MarkdownSnippets.MsBuild" Version="23.1.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="Unquote" Version="5.0.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
