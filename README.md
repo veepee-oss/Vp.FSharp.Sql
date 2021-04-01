@@ -38,7 +38,7 @@ Name                                          | ADO.NET Provider                
 --------------------------------------------- | -------------------------------------------------------------------------------------- | -------- | ------- |
 [`Vp.FSharp.Sql.Sqlite`][sqlite-repo]         | [`System.Data.SQLite.Core`](https://www.nuget.org/packages/System.Data.SQLite.Core)    | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.Sqlite.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)       | `Install-Package Vp.FSharp.Sql.Sqlite`
 [`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]   | [`Microsoft.Data.SqlClient`](https://www.nuget.org/packages/Microsoft.Data.SqlClient)  | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer) | `Install-Package Vp.FSharp.Sql.SqlServer`
-[`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [`Npgsql`](https://www.nuget.org/packages/Npgsql)                                      | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)   | `Install-Package Vp.FSharp.Sql.PostgreSql`
+[`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [`Npgsql`](https://www.nuget.org/packages/Npgsql)                                      | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.PostgreSql)   | `Install-Package Vp.FSharp.Sql.PostgreSql`
 
 In a nutshell, you can create your own complete provider, but you're free to just go with only the things you need.
 
