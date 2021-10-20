@@ -30,19 +30,19 @@ let fakeData values columns =
       GetValues =
         fun resultSetIndex rowIndex ->
             match (resultSetIndex, rowIndex) with
-            | (resultSetIndex, rowIndex)
+            | resultSetIndex, rowIndex
                 when resultSetIndex >= 0
                      && resultSetIndex < List.length values
                      && rowIndex >= 0
                      && rowIndex < List.length values.[resultSetIndex]
                 -> values.[resultSetIndex].[rowIndex]
-            | _ -> sprintf "get values: out of resultSetIndex %i or rowIndex %i" resultSetIndex rowIndex |> failwith
+            | _ -> $"get values: out of resultSetIndex %i{resultSetIndex} or rowIndex %i{rowIndex}" |> failwith
       CountRows =
         fun resultSetIndex ->
             match resultSetIndex with
             | resultSetIndex when resultSetIndex >= 0 && resultSetIndex < List.length values
                 -> List.length values.[resultSetIndex]
-            | _ -> sprintf "count rows: out of resultSetIndex %i" resultSetIndex |> failwith
+            | _ -> $"count rows: out of resultSetIndex %i{resultSetIndex}" |> failwith
       CountResultSets = List.length values }
 
 let makeDeps (valToParam: (string -> 'DbType -> 'DbParameter) option)  =
@@ -116,27 +116,27 @@ let makeCommand connection response =
         with
         member this.CommandText
             with get() = cmdTxt
-            and set(v) = cmdTxt <- v
+            and set v = cmdTxt <- v
         member this.CommandTimeout
             with get() = 0
-            and set(v) = ()
+            and set v = ()
         member this.CommandType
             with get() = CommandType.Text
-            and set(v) = ()
+            and set v = ()
         member this.DbConnection
             with get() = connection
-            and set(v) = connection <- v
+            and set v = connection <- v
         member this.DbParameterCollection
             with get() = null
         member this.DbTransaction
             with get() = null
-            and set(v) = ()
+            and set v = ()
         member this.DesignTimeVisible
             with get() = false
-            and set(v) = ()
+            and set v = ()
         member this.UpdatedRowSource
             with get() = UpdateRowSource()
-            and set(v) = ()
+            and set v = ()
         member this.Cancel () = ()
         member this.CreateDbParameter () = null
         member this.ExecuteDbDataReader commandBehavior =
@@ -157,7 +157,7 @@ let makeConnectionReader cs state openCallback closeCallback response =
         with
         member this.ConnectionString
             with get() = connectionString
-            and set(v) = connectionString <- v
+            and set v = connectionString <- v
         member this.Database
             with get() = ""
         member this.DataSource
@@ -179,7 +179,7 @@ let makeConnection cs state openCallback closeCallback response =
         with
         member this.ConnectionString
             with get() = connectionString
-            and set(v) = connectionString <- v
+            and set v = connectionString <- v
         member this.Database
             with get() = ""
         member this.DataSource

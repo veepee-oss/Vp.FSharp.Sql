@@ -56,7 +56,7 @@ module String =
     [<Literal>]
     let SqlNewLineConstant = "\n"
 
-    let private trimLeftPattern = Regex(sprintf "%s[ ]+" SqlNewLineConstant, RegexOptions.Compiled)
+    let private trimLeftPattern = Regex( $"%s{SqlNewLineConstant}[ ]+", RegexOptions.Compiled)
 
     let trimLeft str = trimLeftPattern.Replace(str, SqlNewLineConstant)
 

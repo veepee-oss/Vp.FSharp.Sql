@@ -67,7 +67,7 @@ module Vp.FSharp.Sql.SqlCommand
     let transaction value commandDefinition = { commandDefinition with Transaction = Some value }
 
     let private formatParameterName (parameterName: string) =
-        if not (parameterName.StartsWith "@") then sprintf "@%s" parameterName
+        if not (parameterName.StartsWith "@") then $"@%s{parameterName}"
         else parameterName
 
     let private setupCommand deps commandDefinition cancellationToken connection =
@@ -76,7 +76,7 @@ module Vp.FSharp.Sql.SqlCommand
 
             Option.iter
                 (deps.SetCommandTransaction command)
-                (commandDefinition.Transaction)
+                commandDefinition.Transaction
 
             match commandDefinition.Text with
             | Single value -> command.CommandText <- String.trimLeft value
@@ -101,7 +101,7 @@ module Vp.FSharp.Sql.SqlCommand
 
         Option.iter
             (deps.SetCommandTransaction command)
-            (commandDefinition.Transaction)
+            commandDefinition.Transaction
 
         match commandDefinition.Text with
         | Single value -> command.CommandText <- String.trimLeft value
@@ -228,7 +228,7 @@ module Vp.FSharp.Sql.SqlCommand
             commandStopwatch.Start ()
             use dbDataReader = deps.ExecuteReader command
             let items =
-                Seq.initInfinite(fun _ -> (dbDataReader))
+                Seq.initInfinite(fun _ -> dbDataReader)
                 |> SkipFirstSeq.scan(readNextRecordSync) { Continue = true; SetIndex = 0; RecordIndex = -1 }
                 |> Seq.takeWhile(fun state -> state.Continue)
                 |> Seq.mapChange(fun state -> state.SetIndex) (fun _ -> SqlRecordReader(dbDataReader))

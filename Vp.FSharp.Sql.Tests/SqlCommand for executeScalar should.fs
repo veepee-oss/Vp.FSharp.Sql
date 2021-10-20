@@ -13,7 +13,7 @@ open Vp.FSharp.Sql.Tests.Helpers
 [<Fact>]
 let ``open and then close the connection if initially closed`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [14]
@@ -41,7 +41,7 @@ let ``open and then close the connection if initially closed`` () =
 [<Fact>]
 let ``leave the connection open if initially open`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [15]
@@ -69,7 +69,7 @@ let ``leave the connection open if initially open`` () =
 [<Fact>]
 let ``log for all events on globalLogger if connection initially closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback, loggerCallback = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [16]
@@ -95,7 +95,7 @@ let ``log for all events on globalLogger if connection initially closed`` () =
 [<Fact>]
 let ``log for just command events on globalLogger if connection initially not closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback, loggerCallback = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [17]

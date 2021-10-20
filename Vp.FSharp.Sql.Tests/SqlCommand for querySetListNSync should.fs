@@ -29,7 +29,7 @@ let private readValueByIndex (columns: int32 list list) indexColumn _ (reader: S
 [<Fact>]
 let ``have querySetListSync should open and then close the connection if initially closed and access value by columnName`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[1..6] |> boxes |> List.splitInto 2
                  [1..8] |> boxes |> List.splitInto 2]
@@ -54,7 +54,7 @@ let ``have querySetListSync should open and then close the connection if initial
 [<Fact>]
 let ``have querySetList2Sync should open and then close the connection if initially closed and access value by columnName`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[1..6] |> boxes |> List.splitInto 2
                  [1..8] |> boxes |> List.splitInto 2]
@@ -66,7 +66,7 @@ let ``have querySetList2Sync should open and then close the connection if initia
         |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
     let deps = Mocks.makeDeps None
     let conf = Mocks.makeConf None
-    let (r0, r1) =
+    let r0, r1 =
         SqlCommand.text "select 1"
         |> SqlCommand.noLogger
         |> SqlCommand.querySetList2Sync connection deps conf
@@ -81,7 +81,7 @@ let ``have querySetList2Sync should open and then close the connection if initia
 [<Fact>]
 let ``have querySetList3Sync open and then close the connection if initially closed and access value by columnName`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[1..6] |> boxes |> List.splitInto 2
                  [1..8] |> boxes |> List.splitInto 2
@@ -95,7 +95,7 @@ let ``have querySetList3Sync open and then close the connection if initially clo
         |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
     let deps = Mocks.makeDeps None
     let conf = Mocks.makeConf None
-    let (r0, r1, r2) =
+    let r0, r1, r2 =
         SqlCommand.text "select 1"
         |> SqlCommand.noLogger
         |> SqlCommand.querySetList3Sync connection deps conf

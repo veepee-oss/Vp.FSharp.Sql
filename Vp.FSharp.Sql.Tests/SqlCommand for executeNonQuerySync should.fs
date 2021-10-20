@@ -13,7 +13,7 @@ open Vp.FSharp.Sql.Tests.Helpers
 [<Fact>]
 let ``open and then close the connection if initially closed`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     use connection =
         Mocks.NonQuery 0
         |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
@@ -29,7 +29,7 @@ let ``open and then close the connection if initially closed`` () =
 [<Fact>]
 let ``leave the connection open if initially open`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     use connection =
         Mocks.NonQuery 1
         |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
@@ -45,7 +45,7 @@ let ``leave the connection open if initially open`` () =
 [<Fact>]
 let ``log for all events on globalLogger if connection initially closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback, loggerCallback = FullCallCounter.createCallbacks callCounter
     use connection =
         Mocks.NonQuery 2
         |> Mocks.makeConnection "toto" ConnectionState.Closed openCallback closeCallback
@@ -60,7 +60,7 @@ let ``log for all events on globalLogger if connection initially closed`` () =
 [<Fact>]
 let ``log just command events on globalLogger if connection initially not closed`` () =
     let callCounter = FullCallCounter.initSame 0
-    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback, loggerCallback = FullCallCounter.createCallbacks callCounter
     use connection =
         Mocks.NonQuery 3
         |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback

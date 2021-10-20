@@ -155,16 +155,15 @@ type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReade
     let availableFields =
         cachedFieldsByName
         |> Seq.mapi (fun index kvp ->
-            sprintf "(%d)[%s:%s|%s]" index kvp.Key kvp.Value.NetTypeName kvp.Value.NativeTypeName)
+            $"(%d{index})[%s{kvp.Key}:%s{kvp.Value.NetTypeName}|%s{kvp.Value.NativeTypeName}]")
         |> String.concat ", "
 
     let failToReadFieldByName fieldName fieldTypeName =
-        failwithf "Could not read field '%s' as %s. Available fields are %s"
-            fieldName fieldTypeName availableFields
+        failwithf $"""Could not read field '%s{fieldName}' as %s{fieldTypeName}.
+                      Available fields are %s{availableFields}"""
 
     let failToReadFieldByIndex fieldIndex fieldTypeName =
-        failwithf "Could not read field at index %d as %s. Available fields are %s"
-            fieldIndex fieldTypeName availableFields
+        failwithf $"Could not read field at index %d{fieldIndex} as %s{fieldTypeName}. Available fields are %s{availableFields}"
 
     /// The current fields accessible by their resp. names
     member this.FieldsByName = cachedFieldsByName
@@ -180,7 +179,7 @@ type SqlRecordReader<'DbDataReader when 'DbDataReader :> DbDataReader>(dataReade
         match cachedFieldsByName.TryGetValue(fieldName) with
             | true, column ->
                 // https://github.com/npgsql/npgsql/issues/2087
-                if dataReader.IsDBNull(fieldName) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
+                if dataReader.IsDBNull(column.Index) && DbNull.is<'T>() then DbNull.retypedAs<'T>()
                 else dataReader.GetFieldValue<'T>(column.Index)
             | false, _ ->
                 failToReadFieldByName fieldName typeof<'T>.Name

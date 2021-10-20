@@ -39,7 +39,7 @@ let readValueOrNoneByIndex (columns: int32 list) _ _ (reader: SqlRecordReader<Db
 [<Fact>]
 let ``open and then close the connection if initially closed and access value by columnName`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;2;3]
@@ -78,7 +78,7 @@ let ``open and then close the connection if initially closed and access value by
 [<Fact>]
 let ``open and then close the connection if initially closed and access value by ordinal`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;2;3]
@@ -117,7 +117,7 @@ let ``open and then close the connection if initially closed and access value by
 [<Fact>]
 let ``open and then close the connection if initially closed and access valueOrNone by columnName`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -156,7 +156,7 @@ let ``open and then close the connection if initially closed and access valueOrN
 [<Fact>]
 let ``open and then close connection if initially closed and access valueOrNone by ordinal`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -195,7 +195,7 @@ let ``open and then close connection if initially closed and access valueOrNone 
 [<Fact>]
 let ``leave the connection open if initially not closed with access valueOrNone by ordinal`` () =
     let callCounter = PartialCallCounter.initSame 0
-    let (openCallback, closeCallback) = PartialCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -234,7 +234,7 @@ let ``leave the connection open if initially not closed with access valueOrNone 
 [<Fact>]
 let ``log all events on globalLogger if connection initially closed with access valueOrNone by ordinal`` () =
     let callCounter = FullCallCounter.initSame 0
-    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback, loggerCallback = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
@@ -272,7 +272,7 @@ let ``log all events on globalLogger if connection initially closed with access 
 [<Fact>]
 let ``log for just command events on globalLogger if connection initially not closed with access valueOrNone by ordinal`` () =
     let callCounter = FullCallCounter.initSame 0
-    let (openCallback, closeCallback, loggerCallback) = FullCallCounter.createCallbacks callCounter
+    let openCallback, closeCallback, loggerCallback = FullCallCounter.createCallbacks callCounter
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
