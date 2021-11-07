@@ -14,11 +14,9 @@ open Vp.FSharp.Sql
 open Vp.FSharp.Sql.Tests.Helpers
 
 
-let toFieldName =
-    sprintf "id%i"
+let toFieldName = sprintf "id%i"
+let toFieldNames = List.map toFieldName
 
-let toFieldNames =
-    List.map toFieldName
 
 let readValueByFieldName (columns: string list) _ _ (reader: SqlRecordReader<DbDataReader>) =
     columns
@@ -276,7 +274,7 @@ let ``log for just command events on globalLogger if connection initially not cl
     let data = Mocks.fakeData
                 [[
                         [1;null;3]
-                        [4;5;6]
+                        [4;5   ;6]
                 ]]
                 [[
                     { Name = "id0"

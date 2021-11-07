@@ -212,36 +212,38 @@ module Vp.FSharp.Sql.SqlCommand
     /// This function runs synchronously.
     let querySeqSync (connection: #DbConnection) deps conf
         (read: Read<_, _>) commandDefinition =
-        let wasClosed = connection.State = ConnectionState.Closed
-        let log sqlLog = log4 conf commandDefinition sqlLog
-        let connectionStopwatch = Stopwatch()
-        let commandStopwatch = Stopwatch()
-        use command = setupCommandSync deps commandDefinition connection
+        seq {
+            let wasClosed = connection.State = ConnectionState.Closed
+            let log sqlLog = log4 conf commandDefinition sqlLog
+            let connectionStopwatch = Stopwatch()
+            let commandStopwatch = Stopwatch()
+            use command = setupCommandSync deps commandDefinition connection
 
-        try
-            if wasClosed then
-                setupConnectionSync connection
-                connectionStopwatch.Start()
-                ConnectionOpened connection |> log
+            try
+                if wasClosed then
+                    setupConnectionSync connection
+                    connectionStopwatch.Start()
+                    ConnectionOpened connection |> log
 
-            CommandPrepared command |> log
-            commandStopwatch.Start ()
-            use dbDataReader = deps.ExecuteReader command
-            let items =
-                Seq.initInfinite(fun _ -> dbDataReader)
-                |> SkipFirstSeq.scan(readNextRecordSync) { Continue = true; SetIndex = 0; RecordIndex = -1 }
-                |> Seq.takeWhile(fun state -> state.Continue)
-                |> Seq.mapChange(fun state -> state.SetIndex) (fun _ -> SqlRecordReader(dbDataReader))
-                |> Seq.map(fun (state, rowReader) -> read state.SetIndex state.RecordIndex rowReader )
-            items
+                CommandPrepared command |> log
+                commandStopwatch.Start ()
+                use dbDataReader = deps.ExecuteReader command
+                let items =
+                    Seq.initInfinite(fun _ -> dbDataReader)
+                    |> SkipFirstSeq.scan(readNextRecordSync) { Continue = true; SetIndex = 0; RecordIndex = -1 }
+                    |> Seq.takeWhile(fun state -> state.Continue)
+                    |> Seq.mapChange(fun state -> state.SetIndex) (fun _ -> SqlRecordReader(dbDataReader))
+                    |> Seq.map(fun (state, rowReader) -> read state.SetIndex state.RecordIndex rowReader )
+                yield! items
 
-        finally
-            commandStopwatch.Stop ()
-            CommandExecuted (command, commandStopwatch.Elapsed) |> log
-            if wasClosed then
-                connection.Close()
-                connectionStopwatch.Stop ()
-                ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
+            finally
+                commandStopwatch.Stop ()
+                CommandExecuted (command, commandStopwatch.Elapsed) |> log
+                if wasClosed then
+                    connection.Close()
+                    connectionStopwatch.Stop ()
+                    ConnectionClosed (connection, connectionStopwatch.Elapsed) |> log
+        }
 
     /// Execute the command and return the sets of rows as a list accordingly to the command definition.
     /// This function runs asynchronously.
