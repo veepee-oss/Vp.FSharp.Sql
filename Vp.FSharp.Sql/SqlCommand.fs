@@ -141,29 +141,32 @@ module Vp.FSharp.Sql.SqlCommand
         let nextSet state = { state with SetIndex = state.SetIndex + 1; RecordIndex = 0 }
         let stop state = { state with Continue = false }
 
-    let private tryReadNextResultRecord state (dataReader: #DbDataReader) cancellationToken =
+    let rec private tryReadNextResultRecord cancellationToken (dataReader: #DbDataReader) state =
         async {
-            let! nextResultReadOk = dataReader.AwaitTryReadNextResult(cancellationToken)
-            if nextResultReadOk then return ReadState.nextSet state
-            else return ReadState.stop state
+            match! dataReader.AwaitTryReadNextResult(cancellationToken) with
+            | Some true -> return ReadState.nextSet state
+            | None -> let state = ReadState.nextSet state
+                      return! tryReadNextResultRecord cancellationToken dataReader state
+            | Some false -> return ReadState.stop state
         }
 
-    let private tryReadNextResultRecordSync state (dataReader: #DbDataReader) =
-        let nextResultReadOk = dataReader.TryReadNextResult()
-        if nextResultReadOk then ReadState.nextSet state
-        else ReadState.stop state
+    let rec private tryReadNextResultRecordSync (dataReader: #DbDataReader) =
+        match dataReader.TryReadNextResult() with
+        | Some true -> ReadState.nextSet
+        | None -> ReadState.nextSet >> tryReadNextResultRecordSync dataReader
+        | Some false ->  ReadState.stop
 
-    let private readNextRecord state (dataReader: #DbDataReader) cancellationToken =
+    let private readNextRecord cancellationToken (dataReader: #DbDataReader) state =
         async {
             let! readOk = dataReader.AwaitRead(cancellationToken)
             if readOk then return ReadState.nextRecord state
-            else return! tryReadNextResultRecord state dataReader cancellationToken
+            else return! tryReadNextResultRecord cancellationToken dataReader state
         }
 
-    let private readNextRecordSync state (dataReader: #DbDataReader) =
+    let private readNextRecordSync (dataReader: #DbDataReader) =
         let readOk = dataReader.Read()
-        if readOk then ReadState.nextRecord state
-        else tryReadNextResultRecordSync state dataReader
+        if readOk then ReadState.nextRecord
+        else tryReadNextResultRecordSync dataReader
 
     /// Execute the command and return the sets of rows as an AsyncSeq accordingly to the command definition.
     /// This function runs asynchronously.
@@ -188,15 +191,13 @@ module Vp.FSharp.Sql.SqlCommand
                 use! dbDataReader = deps.ExecuteReaderAsync command linkedToken |> Async.AwaitTask
                 let items =
                     AsyncSeq.initInfinite(fun _ -> (dbDataReader, linkedToken))
-                    |> SkipFirstAsyncSeq.scanAsync(
+                    |> SkipFirstAsyncSeq.scanAsync (
                         fun state (dataReader, cancellationToken) ->
-                            readNextRecord state dataReader cancellationToken )
+                            readNextRecord cancellationToken dataReader state )
                             { Continue = true; SetIndex = 0; RecordIndex = -1 }
                     |> AsyncSeq.takeWhile(fun state -> state.Continue)
                     |> AsyncSeq.mapChange(fun state -> state.SetIndex) (fun _ -> SqlRecordReader(dbDataReader))
-                    |> AsyncSeq.mapAsync(fun (state, rowReader) -> async {
-                        return read state.SetIndex state.RecordIndex rowReader
-                    })
+                    |> AsyncSeq.mapAsync(fun (state, rowReader) -> read state.SetIndex state.RecordIndex rowReader |> async.Return)
                 yield! items
 
             finally
@@ -230,7 +231,7 @@ module Vp.FSharp.Sql.SqlCommand
                 use dbDataReader = deps.ExecuteReader command
                 let items =
                     Seq.initInfinite(fun _ -> dbDataReader)
-                    |> SkipFirstSeq.scan(readNextRecordSync) { Continue = true; SetIndex = 0; RecordIndex = -1 }
+                    |> SkipFirstSeq.scan (fun a b -> readNextRecordSync b a) { Continue = true; SetIndex = 0; RecordIndex = -1 }
                     |> Seq.takeWhile(fun state -> state.Continue)
                     |> Seq.mapChange(fun state -> state.SetIndex) (fun _ -> SqlRecordReader(dbDataReader))
                     |> Seq.map(fun (state, rowReader) -> read state.SetIndex state.RecordIndex rowReader )
