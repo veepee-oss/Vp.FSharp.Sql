@@ -9,6 +9,7 @@ open System.Threading.Tasks
 open System.Text.RegularExpressions
 
 open FSharp.Control
+open Microsoft.FSharp.Control
 
 
 [<RequireQualifiedAccess>]
@@ -36,13 +37,20 @@ type DbDataReader with
     member this.AwaitTryReadNextResult(cancellationToken) =
         async {
             let! nextResultOk = this.AwaitNextResult(cancellationToken)
-            if nextResultOk then return! this.AwaitRead(cancellationToken)
-            else return nextResultOk
+            if nextResultOk then
+                if this.HasRows then
+                    let! v = this.AwaitRead(cancellationToken)
+                    return Some v
+                else return None
+            else return Some nextResultOk
         }
     member this.TryReadNextResult() =
         let nextResultOk = this.NextResult()
-        if nextResultOk then this.Read()
-        else nextResultOk
+        if nextResultOk then
+            if this.HasRows then
+                this.Read() |> Some
+            else None
+        else Some nextResultOk
 
 [<RequireQualifiedAccess>]
 module String =
