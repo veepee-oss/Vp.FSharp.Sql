@@ -29,7 +29,7 @@ jobs:
       - name: Setup .NET Environment
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.100
+          dotnet-version: 6.0.400
       - name: Restore .NET Tools
         run: dotnet tool restore --tool-manifest ./.config/dotnet-tools.json
       - name: Restore .NET Projects
