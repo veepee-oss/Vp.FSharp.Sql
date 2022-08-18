@@ -242,6 +242,59 @@ let ``leave the connection open if initially not closed with access valueOrNone 
     }
 
 [<Fact>]
+let ``when using a multiple result set and one or more is empty, get all values available`` () =
+    let callCounter = PartialCallCounter.initSame 0
+    let openCallback, closeCallback = PartialCallCounter.createCallbacks callCounter
+    let data = Mocks.fakeData
+                [
+                 [[1]];
+                 [];
+                 [[3;"toto"]]
+                ]
+                [
+                 [
+                    { Name = "id0"
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
+                    }
+                 ];
+                 [
+                    { Name = "id1"
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
+                    }
+                 ];
+                 [
+                    { Name = "id2"
+                      FieldType = typeof<int32>
+                      NativeTypeName = typeof<int32>.Name
+                    };
+                    { Name = "name"
+                      FieldType = typeof<String>
+                      NativeTypeName = typeof<String>.Name
+                    }
+                 ]
+                ]
+    async {
+        use connection =
+            Mocks.Reader (Mocks.makeReader data)
+            |> Mocks.makeConnection "toto" ConnectionState.Connecting openCallback closeCallback
+        let deps = Mocks.makeDeps None
+        let conf = Mocks.makeConf None
+        let! outcome =
+            SqlCommand.text "select 1"
+            |> SqlCommand.noLogger
+            |> SqlCommand.queryAsyncSeq connection deps conf
+               (fun resultSetIndex rowIndex ->
+                    let columns = if resultSetIndex = 1 then [] else [0]
+                    readValueOrNoneByIndex columns resultSetIndex rowIndex)
+            |> AsyncSeq.foldAsync (fun s c -> s @ c |> async.Return) ([]: int32 option list)
+        outcome |> List.length =! 2
+        outcome =! [Some 1;Some 3]
+        PartialCallCounter.assertEqual callCounter 0 0
+    }
+
+[<Fact>]
 let ``log all events on globalLogger if connection initially closed with access valueOrNone by ordinal`` () =
     let callCounter = FullCallCounter.initSame 0
     let openCallback, closeCallback, loggerCallback = FullCallCounter.createCallbacks callCounter
