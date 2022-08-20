@@ -5,7 +5,7 @@
     <Title>Vp.FSharp.Sql</Title>
     <Product>Vp.FSharp</Product>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Authors>Mary Perret</Authors>
+    <Authors>Natalie Perret, Reynald Berriot, Amin Khansari</Authors>
     <Company>Veepee</Company>
     <RepositoryUrl>https://github.com/veepee-oss/Vp.FSharp.Sql</RepositoryUrl>
     <PackageProjectUrl>https://github.com/veepee-oss/Vp.FSharp.Sql</PackageProjectUrl>
