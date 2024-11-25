@@ -2,10 +2,10 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "dotnet-fsharplint": {
-      "version": "0.21.2",
+    "fantomas": {
+      "version": "6.2.3",
       "commands": [
-        "dotnet-fsharplint"
+        "fantomas"
       ]
     }
   }
