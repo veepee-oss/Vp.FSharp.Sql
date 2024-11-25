@@ -30,21 +30,25 @@ let private newTransactionScope isolationLevel timeout scopeOption =
     transactionOptions.IsolationLevel <- isolationLevel
     new TransactionScope(scopeOption, transactionOptions, TransactionScopeAsyncFlowOption.Enabled)
 
-let private startScope isolationLevel timeout scopeOption
-    (connection: #DbConnection) =
+let private startScope isolationLevel timeout scopeOption (connection: #DbConnection) =
     let transactionScope = newTransactionScope isolationLevel timeout scopeOption
     DbConnection.enlistCurrentTransaction connection
     transactionScope
 
-let private startScope2 isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) =
+let private startScope2 isolationLevel timeout scopeOption (connection1: #DbConnection) (connection2: #DbConnection) =
     let transactionScope = newTransactionScope isolationLevel timeout scopeOption
     DbConnection.enlistCurrentTransaction connection1
     DbConnection.enlistCurrentTransaction connection2
     transactionScope
 
-let private startScope3 isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) =
+let private startScope3
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    =
     let transactionScope = newTransactionScope isolationLevel timeout scopeOption
     DbConnection.enlistCurrentTransaction connection1
     DbConnection.enlistCurrentTransaction connection2
@@ -58,6 +62,7 @@ let complete cancellationToken isolationLevel timeout scopeOption (connection: #
     async {
         let closed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed connection
 
@@ -75,6 +80,7 @@ let complete cancellationToken isolationLevel timeout scopeOption (connection: #
 /// This function runs synchronously.
 let completeSync isolationLevel timeout scopeOption (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
+
     try
         DbConnection.openIfClosedSync closed connection
 
@@ -89,17 +95,27 @@ let completeSync isolationLevel timeout scopeOption (connection: #DbConnection) 
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
 /// This function runs asynchronously.
-let complete2 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let complete2
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
 
-            use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+            use transactionScope =
+                startScope2 isolationLevel timeout scopeOption connection1 connection2
+
             let! applyOutcome = body connection1 connection2
 
             transactionScope.Complete()
@@ -113,15 +129,17 @@ let complete2 cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 2 connections and transaction body.
 /// This function runs synchronously.
-let complete2Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let complete2Sync isolationLevel timeout scopeOption (connection1: #DbConnection) (connection2: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
+
     try
         DbConnection.openIfClosedSync closed1 connection1
         DbConnection.openIfClosedSync closed2 connection2
 
-        use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        use transactionScope =
+            startScope2 isolationLevel timeout scopeOption connection1 connection2
+
         let applyOutcome = body connection1 connection2
         transactionScope.Complete()
         applyOutcome
@@ -132,19 +150,30 @@ let complete2Sync isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
 /// This function runs asynchronously.
-let complete3 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
+let complete3
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let closed3 = DbConnection.isClosed connection3
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
             do! DbConnection.openIfClosed linkedToken closed3 connection3
 
-            use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+            use transactionScope =
+                startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
             let! applyOutcome = body connection1 connection2 connection3
             transactionScope.Complete()
             return applyOutcome
@@ -157,17 +186,27 @@ let complete3 cancellationToken isolationLevel timeout scopeOption
 /// Create and commit an automatically generated transaction scope with the given
 /// timeout, scope option, 3 connections and transaction body.
 /// This function runs synchronously.
-let complete3Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
+let complete3Sync
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
     let closed3 = DbConnection.isClosed connection3
+
     try
         DbConnection.openIfClosedSync closed1 connection1
         DbConnection.openIfClosedSync closed2 connection2
         DbConnection.openIfClosedSync closed3 connection3
 
-        use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        use transactionScope =
+            startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
         let applyOutcome = body connection1 connection2 connection3
         transactionScope.Complete()
         applyOutcome
@@ -179,11 +218,11 @@ let complete3Sync isolationLevel timeout scopeOption
 /// Create and do not commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, connection and transaction body.
 /// This function runs asynchronously.
-let notComplete cancellationToken isolationLevel timeout scopeOption
-    (connection: #DbConnection) body =
+let notComplete cancellationToken isolationLevel timeout scopeOption (connection: #DbConnection) body =
     async {
         let closed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed connection
 
@@ -196,9 +235,9 @@ let notComplete cancellationToken isolationLevel timeout scopeOption
 /// Create and do not commit an automatically generated transaction scope with the given
 /// timeout, scope option, connection and transaction body.
 /// This function runs synchronously.
-let notCompleteSync isolationLevel timeout scopeOption
-    (connection: #DbConnection) body =
+let notCompleteSync isolationLevel timeout scopeOption (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
+
     try
         DbConnection.openIfClosedSync closed connection
 
@@ -210,12 +249,20 @@ let notCompleteSync isolationLevel timeout scopeOption
 /// Create and do not commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
 /// This function runs asynchronously.
-let notComplete2 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let notComplete2
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
@@ -230,15 +277,17 @@ let notComplete2 cancellationToken isolationLevel timeout scopeOption
 /// Create and do not commit an automatically generated transaction scope with the given
 /// timeout, scope option, 2 connections and transaction body.
 /// This function runs synchronously.
-let notComplete2Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let notComplete2Sync isolationLevel timeout scopeOption (connection1: #DbConnection) (connection2: #DbConnection) body =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
+
     try
         DbConnection.openIfClosedSync closed1 connection1
         DbConnection.openIfClosedSync closed2 connection2
 
-        use _transaction = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        use _transaction =
+            startScope2 isolationLevel timeout scopeOption connection1 connection2
+
         body connection1 connection2
     finally
         DbConnection.closedIfClosed closed1 connection1
@@ -247,20 +296,30 @@ let notComplete2Sync isolationLevel timeout scopeOption
 /// Create and do not commit an automatically generated transaction scope with the given
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
 /// This function runs asynchronously.
-let notComplete3 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection)
-    body =
+let notComplete3
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let closed3 = DbConnection.isClosed connection3
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
             do! DbConnection.openIfClosed linkedToken closed3 connection3
 
-            use _ = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+            use _ =
+                startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
             return! body connection1 connection2 connection3
         finally
             DbConnection.closedIfClosed closed1 connection1
@@ -271,18 +330,27 @@ let notComplete3 cancellationToken isolationLevel timeout scopeOption
 /// Create and do not commit an automatically generated transaction scope with the given
 /// timeout, scope option, 3 connections and transaction body.
 /// This function runs synchronously.
-let notComplete3Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection)
-    body =
+let notComplete3Sync
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
     let closed3 = DbConnection.isClosed connection3
+
     try
         DbConnection.openIfClosedSync closed1 connection1
         DbConnection.openIfClosedSync closed2 connection2
         DbConnection.openIfClosedSync closed3 connection3
 
-        use _transaction = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        use _transaction =
+            startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
         body connection1 connection2 connection3
     finally
         DbConnection.closedIfClosed closed1 connection1
@@ -293,22 +361,22 @@ let notComplete3Sync isolationLevel timeout scopeOption
 /// cancellation token, timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 /// This function runs asynchronously.
-let completeOnSome cancellationToken isolationLevel timeout scopeOption
-    (connection: #DbConnection) body =
+let completeOnSome cancellationToken isolationLevel timeout scopeOption (connection: #DbConnection) body =
     async {
         let closed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed connection
 
             use transactionScope = startScope isolationLevel timeout scopeOption connection
             let! applyOutcome = body connection
+
             match applyOutcome with
             | Some some ->
                 transactionScope.Complete()
                 return Some some
-            | None ->
-                return None
+            | None -> return None
         finally
             DbConnection.closedIfClosed closed connection
     }
@@ -317,20 +385,20 @@ let completeOnSome cancellationToken isolationLevel timeout scopeOption
 /// token, timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 /// This function runs synchronously.
-let completeOnSomeSync isolationLevel timeout scopeOption
-    (connection: #DbConnection) body =
+let completeOnSomeSync isolationLevel timeout scopeOption (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
+
     try
         DbConnection.openIfClosedSync closed connection
 
         use transactionScope = startScope isolationLevel timeout scopeOption connection
         let applyOutcome = body connection
+
         match applyOutcome with
         | Some some ->
             transactionScope.Complete()
             Some some
-        | None ->
-            None
+        | None -> None
     finally
         DbConnection.closedIfClosed closed connection
 
@@ -338,24 +406,34 @@ let completeOnSomeSync isolationLevel timeout scopeOption
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 /// This function runs asynchronously.
-let completeOnSome2 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let completeOnSome2
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
 
-            use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+            use transactionScope =
+                startScope2 isolationLevel timeout scopeOption connection1 connection2
+
             let! applyOutcome = body connection1 connection2
+
             match applyOutcome with
             | Some some ->
                 transactionScope.Complete()
                 return Some some
-            | None ->
-                return None
+            | None -> return None
         finally
             DbConnection.closedIfClosed closed1 connection1
             DbConnection.closedIfClosed closed2 connection2
@@ -365,22 +443,31 @@ let completeOnSome2 cancellationToken isolationLevel timeout scopeOption
 /// timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 /// This function runs synchronously.
-let completeOnSome2Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let completeOnSome2Sync
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    body
+    =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
+
     try
         DbConnection.openIfClosedSync closed1 connection1
         DbConnection.openIfClosedSync closed2 connection2
 
-        use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        use transactionScope =
+            startScope2 isolationLevel timeout scopeOption connection1 connection2
+
         let applyOutcome = body connection1 connection2
+
         match applyOutcome with
         | Some some ->
             transactionScope.Complete()
             Some some
-        | None ->
-            None
+        | None -> None
     finally
         DbConnection.closedIfClosed closed1 connection1
         DbConnection.closedIfClosed closed2 connection2
@@ -389,26 +476,37 @@ let completeOnSome2Sync isolationLevel timeout scopeOption
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 /// This function runs asynchronously.
-let completeOnSome3 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
+let completeOnSome3
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let closed3 = DbConnection.isClosed connection3
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
             do! DbConnection.openIfClosed linkedToken closed3 connection3
 
-            use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+            use transactionScope =
+                startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
             let! applyOutcome = body connection1 connection2 connection3
+
             match applyOutcome with
             | Some some ->
                 transactionScope.Complete()
                 return Some some
-            | None ->
-                return None
+            | None -> return None
         finally
             DbConnection.closedIfClosed closed1 connection1
             DbConnection.closedIfClosed closed2 connection2
@@ -419,24 +517,34 @@ let completeOnSome3 cancellationToken isolationLevel timeout scopeOption
 /// timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
 /// This function runs synchronously.
-let completeOnSome3Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
+let completeOnSome3Sync
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
     let closed3 = DbConnection.isClosed connection3
+
     try
         DbConnection.openIfClosedSync closed1 connection1
         DbConnection.openIfClosedSync closed2 connection2
         DbConnection.openIfClosedSync closed3 connection3
 
-        use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        use transactionScope =
+            startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
         let applyOutcome = body connection1 connection2 connection3
+
         match applyOutcome with
         | Some some ->
             transactionScope.Complete()
             Some some
-        | None ->
-            None
+        | None -> None
     finally
         DbConnection.closedIfClosed closed1 connection1
         DbConnection.closedIfClosed closed2 connection2
@@ -446,22 +554,22 @@ let completeOnSome3Sync isolationLevel timeout scopeOption
 /// cancellation token, timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
 /// This function runs asynchronously.
-let completeOnOk cancellationToken isolationLevel timeout scopeOption
-    (connection: #DbConnection) body =
+let completeOnOk cancellationToken isolationLevel timeout scopeOption (connection: #DbConnection) body =
     async {
         let closed = DbConnection.isClosed connection
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed connection
 
             use transactionScope = startScope isolationLevel timeout scopeOption connection
             let! applyOutcome = body connection
+
             match applyOutcome with
             | Ok ok ->
                 transactionScope.Complete()
                 return Ok ok
-            | Error error ->
-                return Error error
+            | Error error -> return Error error
         finally
             DbConnection.closedIfClosed closed connection
     }
@@ -470,20 +578,20 @@ let completeOnOk cancellationToken isolationLevel timeout scopeOption
 /// timeout, scope option, connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
 /// This function runs synchronously.
-let completeOnOkSync isolationLevel timeout scopeOption
-    (connection: #DbConnection) body =
+let completeOnOkSync isolationLevel timeout scopeOption (connection: #DbConnection) body =
     let closed = DbConnection.isClosed connection
+
     try
         DbConnection.openIfClosedSync closed connection
 
         use transactionScope = startScope isolationLevel timeout scopeOption connection
         let applyOutcome = body connection
+
         match applyOutcome with
         | Ok ok ->
             transactionScope.Complete()
             Ok ok
-        | Error error ->
-            Error error
+        | Error error -> Error error
     finally
         DbConnection.closedIfClosed closed connection
 
@@ -491,24 +599,34 @@ let completeOnOkSync isolationLevel timeout scopeOption
 /// cancellation token, timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
 /// This function runs asynchronously.
-let completeOnOk2 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let completeOnOk2
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
 
-            use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+            use transactionScope =
+                startScope2 isolationLevel timeout scopeOption connection1 connection2
+
             let! applyOutcome = body connection1 connection2
+
             match applyOutcome with
             | Ok ok ->
                 transactionScope.Complete()
                 return Ok ok
-            | Error error ->
-                return Error error
+            | Error error -> return Error error
         finally
             DbConnection.closedIfClosed closed1 connection1
             DbConnection.closedIfClosed closed2 connection2
@@ -518,22 +636,31 @@ let completeOnOk2 cancellationToken isolationLevel timeout scopeOption
 /// timeout, scope option, 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
 /// This function runs synchronously.
-let completeOnOk2Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) body =
+let completeOnOk2Sync
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    body
+    =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
+
     try
         DbConnection.openIfClosedSync closed1 connection1
         DbConnection.openIfClosedSync closed2 connection2
 
-        use transactionScope = startScope2 isolationLevel timeout scopeOption connection1 connection2
+        use transactionScope =
+            startScope2 isolationLevel timeout scopeOption connection1 connection2
+
         let applyOutcome = body connection1 connection2
+
         match applyOutcome with
         | Ok ok ->
             transactionScope.Complete()
             Ok ok
-        | Error error ->
-            Error error
+        | Error error -> Error error
     finally
         DbConnection.closedIfClosed closed1 connection1
         DbConnection.closedIfClosed closed2 connection2
@@ -542,26 +669,37 @@ let completeOnOk2Sync isolationLevel timeout scopeOption
 /// cancellation token, timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
 /// This function runs asynchronously.
-let completeOnOk3 cancellationToken isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
+let completeOnOk3
+    cancellationToken
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     async {
         let closed1 = DbConnection.isClosed connection1
         let closed2 = DbConnection.isClosed connection2
         let closed3 = DbConnection.isClosed connection3
         let! linkedToken = Async.linkedTokenSourceFrom cancellationToken
+
         try
             do! DbConnection.openIfClosed linkedToken closed1 connection1
             do! DbConnection.openIfClosed linkedToken closed2 connection2
             do! DbConnection.openIfClosed linkedToken closed3 connection3
 
-            use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+            use transactionScope =
+                startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
             let! applyOutcome = body connection1 connection2 connection3
+
             match applyOutcome with
             | Ok ok ->
                 transactionScope.Complete()
                 return Ok ok
-            | Error error ->
-                return Error error
+            | Error error -> return Error error
         finally
             DbConnection.closedIfClosed closed1 connection1
             DbConnection.closedIfClosed closed2 connection2
@@ -572,8 +710,15 @@ let completeOnOk3 cancellationToken isolationLevel timeout scopeOption
 /// timeout, scope option, 3 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.
 /// This function runs synchronously.
-let completeOnOk3Sync isolationLevel timeout scopeOption
-    (connection1: #DbConnection) (connection2: #DbConnection) (connection3: #DbConnection) body =
+let completeOnOk3Sync
+    isolationLevel
+    timeout
+    scopeOption
+    (connection1: #DbConnection)
+    (connection2: #DbConnection)
+    (connection3: #DbConnection)
+    body
+    =
     let closed1 = DbConnection.isClosed connection1
     let closed2 = DbConnection.isClosed connection2
     let closed3 = DbConnection.isClosed connection3
@@ -583,14 +728,16 @@ let completeOnOk3Sync isolationLevel timeout scopeOption
         DbConnection.openIfClosedSync closed2 connection2
         DbConnection.openIfClosedSync closed3 connection3
 
-        use transactionScope = startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+        use transactionScope =
+            startScope3 isolationLevel timeout scopeOption connection1 connection2 connection3
+
         let applyOutcome = body connection1 connection2 connection3
+
         match applyOutcome with
         | Ok ok ->
             transactionScope.Complete()
             Ok ok
-        | Error error ->
-            Error error
+        | Error error -> Error error
     finally
         DbConnection.closedIfClosed closed1 connection1
         DbConnection.closedIfClosed closed2 connection2
@@ -605,8 +752,7 @@ let defaultComplete body =
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
 /// This function runs synchronously.
 let defaultCompleteSync body =
-    body
-    |> completeSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    body |> completeSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// This function runs asynchronously.
@@ -617,8 +763,7 @@ let defaultComplete2 body =
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// This function runs synchronously.
 let defaultComplete2Sync body =
-    body
-    |> complete2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    body |> complete2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// This function runs asynchronously.
@@ -629,8 +774,7 @@ let defaultComplete3 body =
 /// Create and commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// This function runs synchronously.
 let defaultComplete3Sync body =
-    body
-    |> complete3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    body |> complete3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given connection and transaction body.
 /// This function runs asynchronously.
@@ -641,8 +785,7 @@ let defaultNotComplete body =
 /// Create and do not commit an automatically generated transaction scope with the given connection and transaction body.
 /// This function runs synchronously.
 let defaultNotCompleteSync body =
-    body
-    |> notCompleteSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    body |> notCompleteSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// This function runs asynchronously.
@@ -653,8 +796,7 @@ let defaultNotComplete2 body =
 /// Create and do not commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// This function runs synchronously.
 let defaultNotComplete2Sync body =
-    body
-    |> notComplete2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    body |> notComplete2Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and do not commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// This function runs synchronously.
@@ -665,8 +807,7 @@ let defaultNotComplete3 body =
 /// Create and do not commit an automatically generated transaction scope with the given 3 connections and transaction body.
 /// This function runs synchronously.
 let defaultNotComplete3Sync body =
-    body
-    |> notComplete3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    body |> notComplete3Sync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given connection and transaction body.
 /// The commit phase only occurs if the transaction body returns Some.
@@ -721,8 +862,7 @@ let defaultCompleteOnOk body =
 /// The commit phase only occurs if the transaction body returns Ok.
 /// This function runs synchronously.
 let defaultCompleteOnOkSync body =
-    body
-    |> completeOnOkSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
+    body |> completeOnOkSync DefaultIsolationLevel defaultTimeout DefaultScopeOption
 
 /// Create and commit an automatically generated transaction scope with the given 2 connections and transaction body.
 /// The commit phase only occurs if the transaction body returns Ok.

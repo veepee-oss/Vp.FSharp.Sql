@@ -35,6 +35,6 @@ jobs:
       - name: Restore .NET Projects
         run: dotnet restore
       - name: Run F# Linter
-        run: dotnet fsharplint lint --lint-config fsharplint.json Vp.FSharp.Sql.sln
+        run: dotnet fantomas -r --check ./
       - name: Run Tests
         run: dotnet test

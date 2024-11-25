@@ -13,7 +13,7 @@ open Microsoft.FSharp.Control
 
 
 [<RequireQualifiedAccess>]
-module DbConnection  =
+module DbConnection =
 
     let enlistCurrentTransaction (connection: #DbConnection) =
         connection.EnlistTransaction(Transaction.Current)
@@ -22,35 +22,48 @@ module DbConnection  =
         connection.State = ConnectionState.Closed
 
     let openIfClosed cancellationToken closed (connection: #DbConnection) =
-        async { if closed then do! connection.OpenAsync(cancellationToken) |> Async.AwaitTask }
+        async {
+            if closed then
+                do! connection.OpenAsync(cancellationToken) |> Async.AwaitTask
+        }
 
     let openIfClosedSync closed (connection: #DbConnection) =
-        if closed then connection.Open()
+        if closed then
+            connection.Open()
 
     let closedIfClosed closed (connection: #DbConnection) =
-        if closed then connection.Close()
+        if closed then
+            connection.Close()
 
 type DbDataReader with
 
-    member this.AwaitRead(cancellationToken) = this.ReadAsync(cancellationToken) |> Async.AwaitTask
-    member this.AwaitNextResult(cancellationToken) = this.NextResultAsync(cancellationToken) |> Async.AwaitTask
+    member this.AwaitRead(cancellationToken) =
+        this.ReadAsync(cancellationToken) |> Async.AwaitTask
+
+    member this.AwaitNextResult(cancellationToken) =
+        this.NextResultAsync(cancellationToken) |> Async.AwaitTask
+
     member this.AwaitTryReadNextResult(cancellationToken) =
         async {
             let! nextResultOk = this.AwaitNextResult(cancellationToken)
+
             if nextResultOk then
                 if this.HasRows then
                     let! v = this.AwaitRead(cancellationToken)
                     return Some v
-                else return None
-            else return Some nextResultOk
+                else
+                    return None
+            else
+                return Some nextResultOk
         }
+
     member this.TryReadNextResult() =
         let nextResultOk = this.NextResult()
+
         if nextResultOk then
-            if this.HasRows then
-                this.Read() |> Some
-            else None
-        else Some nextResultOk
+            if this.HasRows then this.Read() |> Some else None
+        else
+            Some nextResultOk
 
 [<RequireQualifiedAccess>]
 module String =
@@ -64,9 +77,11 @@ module String =
     [<Literal>]
     let SqlNewLineConstant = "\n"
 
-    let private trimLeftPattern = Regex( $"%s{SqlNewLineConstant}[ ]+", RegexOptions.Compiled)
+    let private trimLeftPattern =
+        Regex($"%s{SqlNewLineConstant}[ ]+", RegexOptions.Compiled)
 
-    let trimLeft str = trimLeftPattern.Replace(str, SqlNewLineConstant)
+    let trimLeft str =
+        trimLeftPattern.Replace(str, SqlNewLineConstant)
 
     let stitch strs = String.concat SqlNewLineConstant strs
 
@@ -83,7 +98,10 @@ module Async =
     let linkedTokenSourceFrom cancellationToken =
         async {
             let! token = Async.CancellationToken
-            use mergedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, cancellationToken)
+
+            use mergedTokenSource =
+                CancellationTokenSource.CreateLinkedTokenSource(token, cancellationToken)
+
             return mergedTokenSource.Token
         }
 
@@ -92,70 +110,75 @@ module Async =
 module SkipFirstAsyncSeq =
 
     let scan folder state source =
-        AsyncSeq.scan folder state source
-        |> AsyncSeq.skip(1)
+        AsyncSeq.scan folder state source |> AsyncSeq.skip (1)
 
     let scanAsync folder state source =
-        AsyncSeq.scanAsync folder state source
-        |> AsyncSeq.skip(1)
+        AsyncSeq.scanAsync folder state source |> AsyncSeq.skip (1)
 
 [<RequireQualifiedAccess>]
 module SkipFirstSeq =
     let scan folder state source =
-        Seq.scan folder state source
-        |> Seq.skip(1)
+        Seq.scan folder state source |> Seq.skip (1)
 
 [<RequireQualifiedAccess>]
 module AsyncSeq =
 
     let mapbi mapping source =
         source
-        |> SkipFirstAsyncSeq.scan(fun state item -> (fst state + 1I, item)) (-1I, def)
-        |> AsyncSeq.map(fun (bi, item) -> mapping bi item)
+        |> SkipFirstAsyncSeq.scan (fun state item -> (fst state + 1I, item)) (-1I, def)
+        |> AsyncSeq.map (fun (bi, item) -> mapping bi item)
 
     let mapChange selector mapping source =
         source
         |> mapbi (fun bi item -> (bi, item))
-        |> AsyncSeq.scan(fun (previousSelection, previousMappedItem, _) (bi, item) ->
-            if bi = 0I then
-                (selector item, mapping item, item)
-            else
-                let currentSelection = selector item
-                let mappedItem = mapping item
-                if previousSelection <> currentSelection then (currentSelection, mappedItem, item)
-                else (previousSelection, previousMappedItem, item)
-            ) (def, def, def)
-        |> AsyncSeq.skip 1
-        |> AsyncSeq.map(fun (_, mappedItem, item) -> (item, mappedItem))
+        |> AsyncSeq.scan
+            (fun (previousSelection, previousMappedItem, _) (bi, item) ->
+                if bi = 0I then
+                    (selector item, mapping item, item)
+                else
+                    let currentSelection = selector item
+                    let mappedItem = mapping item
 
-    let consume source = AsyncSeq.iter(fun _ -> ()) source
+                    if previousSelection <> currentSelection then
+                        (currentSelection, mappedItem, item)
+                    else
+                        (previousSelection, previousMappedItem, item))
+            (def, def, def)
+        |> AsyncSeq.skip 1
+        |> AsyncSeq.map (fun (_, mappedItem, item) -> (item, mappedItem))
+
+    let consume source = AsyncSeq.iter (fun _ -> ()) source
 
 [<RequireQualifiedAccess>]
 module Seq =
 
     let mapbi mapping source =
         source
-        |> SkipFirstSeq.scan(fun state item -> (fst state + 1I, item)) (-1I, def)
-        |> Seq.map(fun (bi, item) -> mapping bi item)
+        |> SkipFirstSeq.scan (fun state item -> (fst state + 1I, item)) (-1I, def)
+        |> Seq.map (fun (bi, item) -> mapping bi item)
 
     let mapChange selector mapping source =
         source
         |> mapbi (fun bi item -> (bi, item))
-        |> Seq.scan(fun (previousSelection, previousMappedItem, _) (bi, item) ->
-            if bi = 0I then
-                (selector item, mapping item, item)
-            else
-                let currentSelection = selector item
-                let mappedItem = mapping item
-                if previousSelection <> currentSelection then (currentSelection, mappedItem, item)
-                else (previousSelection, previousMappedItem, item)
-            ) (def, def, def)
-        |> Seq.skip 1
-        |> Seq.map(fun (_, mappedItem, item) -> (item, mappedItem))
+        |> Seq.scan
+            (fun (previousSelection, previousMappedItem, _) (bi, item) ->
+                if bi = 0I then
+                    (selector item, mapping item, item)
+                else
+                    let currentSelection = selector item
+                    let mappedItem = mapping item
 
-    let consume source = Seq.iter(fun _ -> ()) source
+                    if previousSelection <> currentSelection then
+                        (currentSelection, mappedItem, item)
+                    else
+                        (previousSelection, previousMappedItem, item))
+            (def, def, def)
+        |> Seq.skip 1
+        |> Seq.map (fun (_, mappedItem, item) -> (item, mappedItem))
+
+    let consume source = Seq.iter (fun _ -> ()) source
 
 module DbNull =
-    let is<'T>() = typedefof<'T> = typedefof<DBNull>
+    let is<'T> () = typedefof<'T> = typedefof<DBNull>
 
-    let retypedAs<'T>() = DBNull.Value :> obj :?> 'T
+    let retypedAs<'T> () = DBNull.Value :> obj :?> 'T

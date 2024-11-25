@@ -40,8 +40,10 @@ module FullCallCounter =
         | ConnectionClosed _ -> incrConnectionClosed callCounter
         | CommandPrepared _ -> incrCommandPrepared callCounter
         | CommandExecuted _ -> incrCommandExecuted callCounter
-    let createOpenCallback (callCounter: FullCallCounter) = fun() -> incrOpenCall callCounter
-    let createCloseCallback (callCounter: FullCallCounter) = fun() -> incrCloseCall callCounter
+
+    let createOpenCallback (callCounter: FullCallCounter) = fun () -> incrOpenCall callCounter
+    let createCloseCallback (callCounter: FullCallCounter) = fun () -> incrCloseCall callCounter
+
     let createCallbacks (callCounter: FullCallCounter) =
         (createOpenCallback callCounter, createCloseCallback callCounter, createLoggerCallback callCounter)
 
@@ -53,7 +55,8 @@ module FullCallCounter =
           CommandPrepared = commandPrepared
           CommandExecuted = commandExecuted }
 
-    let initSame value = init value value value value value value
+    let initSame value =
+        init value value value value value value
 
     let assertEqual
         (actual: FullCallCounter)
@@ -62,7 +65,8 @@ module FullCallCounter =
         expectedConnectionOpened
         expectedConnectionClosed
         expectedCommandPrepared
-        expectedCommandExecuted =
+        expectedCommandExecuted
+        =
         actual.OpenCall =! expectedOpenCall
         actual.CloseCall =! expectedCloseCall
         actual.ConnectionOpened =! expectedConnectionOpened
@@ -82,8 +86,9 @@ module PartialCallCounter =
     let incrCloseCall (callCounter: PartialCallCounter) =
         callCounter.CloseCall <- callCounter.CloseCall + 1
 
-    let createOpenCallback (callCounter: PartialCallCounter) = fun() -> incrOpenCall callCounter
-    let createCloseCallback (callCounter: PartialCallCounter) = fun() -> incrCloseCall callCounter
+    let createOpenCallback (callCounter: PartialCallCounter) = fun () -> incrOpenCall callCounter
+    let createCloseCallback (callCounter: PartialCallCounter) = fun () -> incrCloseCall callCounter
+
     let createCallbacks (callCounter: PartialCallCounter) =
         (createOpenCallback callCounter, createCloseCallback callCounter)
 
@@ -93,9 +98,6 @@ module PartialCallCounter =
 
     let initSame value = init value value
 
-    let assertEqual
-        (actual: PartialCallCounter)
-        expectedOpenCall
-        expectedCloseCall =
+    let assertEqual (actual: PartialCallCounter) expectedOpenCall expectedCloseCall =
         actual.OpenCall =! expectedOpenCall
         actual.CloseCall =! expectedCloseCall
