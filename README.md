@@ -10,12 +10,12 @@ If you just want to execute SQL commands a-la-F#, you might want to look at [thi
 
 We follow "highly controversial practices" to the best of our ability!
 
-Status     | Package                
----------- | ----------------------
-OK         | [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)
-OK (sorta) | [![semver](https://img.shields.io/badge/semver-2.0.0-green)](https://semver.org/spec/v2.0.0.html)
-TBD        | [![keep a changelog](https://img.shields.io/badge/keep%20a%20changelog-1.0.0-red)](https://keepachangelog.com/en/1.0.0)
-TBD        | [![Semantic Release](https://img.shields.io/badge/Semantic%20Release-17.1.1-red)](https://semantic-release.gitbook.io/semantic-release)
+| Status     | Package                                                                                                                                 |
+|------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| OK         | [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)         |
+| OK (sorta) | [![semver](https://img.shields.io/badge/semver-2.0.0-green)](https://semver.org/spec/v2.0.0.html)                                       |
+| TBD        | [![keep a changelog](https://img.shields.io/badge/keep%20a%20changelog-1.0.0-red)](https://keepachangelog.com/en/1.0.0)                 |
+| TBD        | [![Semantic Release](https://img.shields.io/badge/Semantic%20Release-17.1.1-red)](https://semantic-release.gitbook.io/semantic-release) |
 
 [Conventional Commits]: https://conventionalcommits.org
 [semver]: https://img.shields.io/badge/semver-2.0.0-blue
@@ -34,11 +34,11 @@ This library mostly aims to be a foundation for building other libraries with th
 
 You can check out the libraries below, each leveraging `Vp.FSharp.Sql` and the relevant ADO.NET provider:
 
-Name                                          | ADO.NET Provider                                                                       | Version  | Command |
---------------------------------------------- | -------------------------------------------------------------------------------------- | -------- | ------- |
-[`Vp.FSharp.Sql.Sqlite`][sqlite-repo]         | [`System.Data.SQLite.Core`](https://www.nuget.org/packages/System.Data.SQLite.Core)    | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.Sqlite.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)       | `Install-Package Vp.FSharp.Sql.Sqlite`
-[`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]   | [`Microsoft.Data.SqlClient`](https://www.nuget.org/packages/Microsoft.Data.SqlClient)  | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer) | `Install-Package Vp.FSharp.Sql.SqlServer`
-[`Vp.FSharp.Sql.PostgreSql`][postgresql-repo] | [`Npgsql`](https://www.nuget.org/packages/Npgsql)                                      | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.PostgreSql)   | `Install-Package Vp.FSharp.Sql.PostgreSql`
+| Name                                           | ADO.NET Provider                                                                      | Version                                                                                                                                | Command                                    |
+|------------------------------------------------|---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| [`Vp.FSharp.Sql.Sqlite`][sqlite-repo]          | [`System.Data.SQLite.Core`](https://www.nuget.org/packages/System.Data.SQLite.Core)   | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.Sqlite.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.Sqlite)         | `Install-Package Vp.FSharp.Sql.Sqlite`     |
+| [`Vp.FSharp.Sql.SqlServer`][sqlserver-repo]    | [`Microsoft.Data.SqlClient`](https://www.nuget.org/packages/Microsoft.Data.SqlClient) | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.SqlServer.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.SqlServer)   | `Install-Package Vp.FSharp.Sql.SqlServer`  |
+| [`Vp.FSharp.Sql.PostgresSql`][postgresql-repo] | [`Npgsql`](https://www.nuget.org/packages/Npgsql)                                     | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.PostgreSql) | `Install-Package Vp.FSharp.Sql.PostgreSql` |
 
 In a nutshell, you can create your own complete provider, but you're free to just go with only the things you need.
 
